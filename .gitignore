@@ -1,0 +1,6 @@
+*.gch
+.cache
+compile_commands.json
+/bin
+/obj
+/lib
