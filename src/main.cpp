@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 #include <type_traits>
 #include <unistd.h>
 
@@ -6,28 +7,20 @@
 using Getargv::Argv;
 using Getargv::ArgvArgc;
 
-#include <iostream>
+int main(int argc, char *argv[]) {
+  char **end = argv + argc;
+  bool nuls =
+      (argc > 1) && std::find_if(argv, end, [](auto c) { return c == "-0"; });
 
-int main() {
-  pid_t pid = getpid();
+  char **itr = std::find(argv, end, "-s");
+  unsigned int skip = (itr != end && ++itr != end) ? static_cast<unsigned int>(std::stoul(*itr)) : 0;
+
+  pid_t pid = (argc > 1) ? std::stoi(argv[argc - 1]) : getpid();
 
   static_assert(std::contiguous_iterator<Argv::Iterator>);
   static_assert(std::contiguous_iterator<ArgvArgc::Iterator>);
 
-  ArgvArgc array = ArgvArgc::as_array(pid);
-  for (auto s : array) {
-    std::cout << std::string(s) << "\n";
-  }
-  std::cout << "length: " << array.size() << "\n";
-  std::cout << "length: " << std::distance(array.begin(), array.end()) << "\n";
-
-  Argv bytes = Argv::as_bytes(pid);
-  for (auto c : bytes) {
-    std::cout << c << "\n";
-  }
-
-  std::cout << "length: " << bytes.size() << "\n";
-  std::cout << "length: " << std::distance(bytes.begin(), bytes.end()) << "\n";
+  Argv bytes = Argv::as_bytes(pid, skip, nuls);
 
   if (!bytes.print()) {
     std::cerr << "printing fucked up\n";

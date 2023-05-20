@@ -1,21 +1,21 @@
-#include "iter.hpp"
-#include <cstddef>
-
 #ifndef LIBGETARGVPLUSPLUS_H
 #define LIBGETARGVPLUSPLUS_H
+
+#include "iter.hpp"
+#include <cstddef>
+#include <string>
+#include <vector>
 
 namespace ffi {
 #include <libgetargv.h>
 }
 
-/* TODO:
-  - tests
- */
+// TODO: tests
 
 namespace Getargv {
 
 struct Argv : protected ffi::ArgvResult {
-  using Iterator = Iterator<char>;
+  using Iterator = IterGen::Iterator<char>;
 
   static Argv as_bytes(pid_t pid, unsigned int skip = 0,
                        bool nuls = false) noexcept(false);
@@ -35,7 +35,7 @@ struct Argv : protected ffi::ArgvResult {
 };
 
 struct ArgvArgc : protected ffi::ArgvArgcResult {
-  using Iterator = Iterator<char *>;
+  using Iterator = IterGen::Iterator<char *>;
 
   static ArgvArgc as_array(pid_t pid) noexcept(false);
   static std::vector<std::string> as_string_array(pid_t pid) noexcept(false);
@@ -43,7 +43,7 @@ struct ArgvArgc : protected ffi::ArgvArgcResult {
   ArgvArgc(ffi::ArgvArgcResult &r);
   ~ArgvArgc();
 
-  char *&operator[](const ptrdiff_t index) const;
+  char *&operator[](const ptrdiff_t index) const;//auto converts to std::string
   ptrdiff_t size() const;
   bool empty() const;
   Iterator begin() const;

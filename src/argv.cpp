@@ -1,7 +1,5 @@
 #include <cerrno>
-#include <cstdint>
 #include <stdexcept>
-#include <string>
 #include <system_error>
 
 #include "libgetargv++.hpp"
