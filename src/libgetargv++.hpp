@@ -21,8 +21,10 @@ struct Argv : protected ffi::ArgvResult {
                        bool nuls = false) noexcept(false);
   static std::string as_string(pid_t pid, unsigned int skip,
                                bool nuls) noexcept(false);
+#if defined(__cplusplus) && (__cplusplus == 201703L)
   Argv(Argv &r) = delete;
-  Argv(ffi::ArgvResult &r);
+#endif
+  Argv(const ffi::ArgvResult &r);
   ~Argv();
 
   char &operator[](const ptrdiff_t index) const;
@@ -39,8 +41,10 @@ struct ArgvArgc : protected ffi::ArgvArgcResult {
 
   static ArgvArgc as_array(pid_t pid) noexcept(false);
   static std::vector<std::string> as_string_array(pid_t pid) noexcept(false);
+#if defined(__cplusplus) && (__cplusplus == 201703L)
   ArgvArgc(ArgvArgc &r) = delete;
-  ArgvArgc(ffi::ArgvArgcResult &r);
+#endif
+  ArgvArgc(const ffi::ArgvArgcResult &r);
   ~ArgvArgc();
 
   char *&operator[](const ptrdiff_t index) const;//auto converts to std::string

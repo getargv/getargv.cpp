@@ -6,7 +6,7 @@
 
 namespace Getargv {
 
-ArgvArgc::ArgvArgc(ffi::ArgvArgcResult &r) : ffi::ArgvArgcResult(r) {}
+ArgvArgc::ArgvArgc(const ffi::ArgvArgcResult &r) : ffi::ArgvArgcResult(r) {}
 ArgvArgc::~ArgvArgc() { ffi::free_ArgvArgcResult(this); }
 
 ptrdiff_t ArgvArgc::size() const { return argc; }

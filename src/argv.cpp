@@ -6,7 +6,7 @@
 
 namespace Getargv {
 
-Argv::Argv(ffi::ArgvResult &r) : ffi::ArgvResult(r) {}
+Argv::Argv(const ffi::ArgvResult &r) : ffi::ArgvResult(r) {}
 Argv::~Argv() { ffi::free_ArgvResult(this); }
 
 bool Argv::print() {
