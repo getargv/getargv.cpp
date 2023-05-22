@@ -17,8 +17,13 @@ int main(int argc, char *argv[]) {
 
   pid_t pid = (argc > 1) ? std::stoi(argv[argc - 1]) : getpid();
 
+#if defined(__cplusplus) && (__cplusplus == 202002L)
   static_assert(std::contiguous_iterator<Argv::Iterator>);
   static_assert(std::contiguous_iterator<ArgvArgc::Iterator>);
+#else
+  static_assert(std::is_same<std::random_access_iterator_tag, Argv::Iterator::iterator_category>::value);
+  static_assert(std::is_same<std::random_access_iterator_tag, ArgvArgc::Iterator::iterator_category>::value);
+#endif
 
   Argv bytes = Argv::as_bytes(pid, skip, nuls);
 
