@@ -1,3 +1,6 @@
+LIBVER=$(shell vtool -show-build /usr/local/lib/libgetargv.dylib | awk '/minos/{print $$2}')
+export MACOSX_DEPLOYMENT_TARGET=$(LIBVER)
+
 CXX=clang++
 CPPFLAGS += -MMD -MP
 CXXFLAGS += --std=c++20 -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic
