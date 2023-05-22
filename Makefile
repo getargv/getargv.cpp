@@ -3,8 +3,8 @@ export MACOSX_DEPLOYMENT_TARGET=$(LIBVER)
 
 CXX=clang++
 CPPFLAGS += -MMD -MP
-CXXFLAGS += --std=c++20 -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic
-LDFLAGS += -Llib -fvisibility=default
+CXXFLAGS += --std=c++20 -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
+LDFLAGS += -Llib -fvisibility=default -fPIC
 LDLIBS += -lgetargv
 
 .PHONY := run db clean
@@ -14,13 +14,13 @@ run: bin/main
 	bin/main
 
 lib/libgetargv++.dylib: obj/argv.o obj/argvargc.o | lib
-	$(CXX) -dynamiclib $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -dynamiclib $^ -o $@
 
 bin/main: lib/libgetargv++.dylib obj/main.o | bin
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lgetargv++ $^ -o $@
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lgetargv++ -fPIE $^ -o $@
 
 obj/%.o: src/%.cpp | obj
-	$(CXX) $(CPPFLAGS) -c $(CXXFLAGS) $< -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^ -o $@
 
 bin lib obj:
 	mkdir -p $@
