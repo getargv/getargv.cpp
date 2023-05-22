@@ -10,7 +10,7 @@ using Getargv::ArgvArgc;
 int main(int argc, char *argv[]) {
   char **end = argv + argc;
   bool nuls =
-      (argc > 1) && std::find_if(argv, end, [](auto c) { return c == "-0"; });
+    (argc > 1) && std::find_if(argv, end, [](char* c) { return std::string(c) == "-0"; });
 
   char **itr = std::find(argv, end, "-s");
   unsigned int skip = (itr != end && ++itr != end) ? static_cast<unsigned int>(std::stoul(*itr)) : 0;

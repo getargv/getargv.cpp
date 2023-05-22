@@ -44,7 +44,7 @@ std::vector<std::string> ArgvArgc::as_string_array(pid_t pid) noexcept(false) {
   std::vector<std::string> aresult;
   aresult.reserve(static_cast<bool>(result.size()));
   std::transform(result.begin(), result.end(), back_inserter(aresult),
-                 [](auto c) -> std::string { return std::string(c); });
+                 [](char* c) -> std::string { return std::string(c); });
   return aresult;
 }
 
