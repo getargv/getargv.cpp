@@ -3,7 +3,8 @@ export MACOSX_DEPLOYMENT_TARGET=$(LIBVER)
 
 CXX=clang++
 CPPFLAGS += -MMD -MP
-CXXFLAGS += --std=c++20 -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
+CXXFLAGS := --std=c++20
+EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
 LDFLAGS += -Llib -fvisibility=default -fPIC
 LDLIBS += -lgetargv
 
@@ -14,13 +15,13 @@ run: bin/main
 	bin/main
 
 lib/libgetargv++.dylib: obj/argv.o obj/argvargc.o | lib
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -dynamiclib $^ -o $@
+	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -dynamiclib $^ -o $@
 
 bin/main: lib/libgetargv++.dylib obj/main.o | bin
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lgetargv++ -fPIE $^ -o $@
+	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lgetargv++ -fPIE $^ -o $@
 
 obj/%.o: src/%.cpp | obj
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(EXTRA_CXXFLAGS) -c $^ -o $@
 
 bin lib obj:
 	mkdir -p $@

@@ -12,10 +12,6 @@ namespace ffi {
 
 // TODO: tests
 
-#if defined(__cplusplus) && (__cplusplus < 201703L)
-#error "C++ versions less than C++17 are not supported."
-#endif
-
 namespace Getargv {
 
 struct Argv : protected ffi::ArgvResult {
@@ -27,6 +23,7 @@ struct Argv : protected ffi::ArgvResult {
                                bool nuls) noexcept(false);
 
   Argv(Argv &r) = delete;
+  Argv(Argv &&r) = default;
   Argv(const ffi::ArgvResult &r);
   ~Argv();
 
@@ -46,6 +43,7 @@ struct ArgvArgc : protected ffi::ArgvArgcResult {
   static std::vector<std::string> as_string_array(pid_t pid) noexcept(false);
 
   ArgvArgc(ArgvArgc &r) = delete;
+  ArgvArgc(ArgvArgc &&r) = default;
   ArgvArgc(const ffi::ArgvArgcResult &r);
   ~ArgvArgc();
 
