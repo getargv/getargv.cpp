@@ -12,6 +12,10 @@ namespace ffi {
 
 // TODO: tests
 
+#if defined(__cplusplus) && (__cplusplus < 201703L)
+#error "C++ versions less than C++17 are not supported."
+#endif
+
 namespace Getargv {
 
 struct Argv : protected ffi::ArgvResult {
