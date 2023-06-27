@@ -1,0 +1,115 @@
+.Dd June 27, 2023
+.Dt libgetargv++ 3
+.Os
+.Sh NAME
+.Nm libgetargv++
+.Nd library functions for getting and printing other processes' args
+.Sh LIBRARY
+.Lb libgetargv++
+.Sh SYNOPSIS
+.In libgetargv++.hpp
+.Vt struct GetArgvOptions { int skip; pid_t pid; bool nuls; };
+.Vt struct ArgvArgcResult { char* buffer; char** argv; uint argc; };
+.Vt struct ArgvResult     { char* buffer; char* start_pointer; char* end_pointer; };
+.Ft bool
+.Fn get_argv_of_pid "const struct GetArgvOptions* options" "struct ArgvResult* result"
+.Ft bool
+.Fn get_argv_and_argc_of_pid "pid_t pid" "struct ArgvArgcResult* result"
+.Ft bool
+.Fn print_argv_of_pid "char* start_pointer" "char* end_pointer"
+.Ft void
+.Fn free_ArgvResult "struct ArgvResult* result"
+.Ft void
+.Fn free_ArgvArgcResult "struct ArgvArgcResult* result"
+.Sh DESCRIPTION
+.No The first and only library to provide a correct interface to the Dv KERN_PROCARGS2 No sysctl. Every other program/library Po including Apple's Xr ps 1 Pc incorrectly indexes the arguments while parsing, in the case of empty leading arguments; resulting in the inclusion of env vars in addition to arguments. This is because while it is conventional to put the executable name in Va argv[0] , No it is not enforced by xnu (the kernel), however everyone else relies on it being true.
+.Pp
+.Fn get_argv_of_pid No takes as arguments: a pointer to a Ft struct GetArgvOptions No which controls: whether the Dv NUL Ns s which separate the arguments in Va argv No are replaced with spaces Po .nuls = true Pc , No how many leading arguments to skip Po .skip = # Pc , No and the Ar pid No to target Po .pid = # Pc ; No and a pointer to a Ft struct ArgvResult Ns . The results of the function are populated in the Fa result No struct: Po .start_pointer Pc is a pointer to the start of the Va argv Po skipped ahead by as many args as requested Pc , Po .end_pointer Pc is a pointer to the end of the Va argv , Po .buffer Pc is the entire raw buffer which it is the caller's responsibility to Xr free 3 Po you can use Fn free_ArgvResult No to ensure you use the matching Xr free 3 No function to this library's Xr malloc 3 No function Pc . The return value of the function is a boolean indicating success Po true Pc or failure Po false Pc ; in case of failure Xr errno 2 No is set, and the buffer pointer in Fa result Ns , is set to Dv NULL . \&In No the case where there are no arguments to return Po .argc == 0 Pc or Po .skip == argc Pc then .start_pointer, .end_pointer, and .buffer are set to Dv NULL . Use Fn get_argv_and_argc_of_pid No if you want to inspect the results and not just print them.
+.Pp
+.Fn get_argv_and_argc_of_pid No is an alternative to Fn get_argv_of_pid No which returns the Fa argc No and Fa argv No of a Ar pid Ns , with Fa argv No formatted as a Ft char** Ns , just like if it was passed to Fn main Ns . \&It takes as arguments a Ft pid_t Fa pid , No and a pointer to an Ft ArgvArgcResult No struct which will be populated with the Fa argc No and Fa argv No of the Ar pid Ns , and the backing buffer from the sysctl. \&It is the caller's responsibility to Xr free 3 No the backing buffer Po .buffer Pc and the Po .argv Pc array  Po you can use Fn free_ArgvArgcResult No to ensure you use the matching Xr free 3 No function to this library's Xr malloc 3 No function Pc , except when argc is 0 in which case the buffer and argv array are set to Dv NULL . The return value of the function is a Vt bool No indicating success Po true Pc or failure Po false Pc ; in case of failure Xr errno 2 No is set, and the pointers in Fa result No are set to Dv NULL .
+.Pp
+.Fn print_argv_of_pid No is a convenience function that will print to stdout every byte from Fa start_pointer No to Fa end_pointer , No including Dv NUL Ns s, in a performant way. Its return value is a Vt bool No indicating success Po true Pc or failure Po false Pc ; on failure Xr errno 2 is set. If Ar start_pointer No or Ar end_pointer No are Dv NULL pointers Po note: not Dv NUL bytes Pc , or both point to the same address, or Fa end_pointer No is greater than Fa start_pointer No then nothing is printed.
+.Pp
+.Fn free_ArgvResult No is a safe way to Xr free 3 No the pointer in a Ft struct ArgvResult No using the matching Xr free 3 No function to the Xr malloc 3 No that allocated the buffer it holds a pointer to. This function does not return a value.
+.Pp
+.Fn free_ArgvArgcResult No is a safe way to Xr free 3 No the pointers in a Ft struct ArgvArgcResult No using the matching Xr free 3 No function to the Xr malloc 3 No that allocated the buffers it holds pointers to. This function does not return a value.
+.Sh ERRORS
+In addition to the errors documented for the
+.Xr sysctl 3
+and
+.Xr write 2
+system calls, the functions in
+.Nm
+.Pq except the free_Argv*Result functions
+may return false to indicate failure, and set
+.Xr errno 2
+as described below:
+.Bl -tag -width Er
+.It Bq Er EINVAL
+Targeted pid's args either are not NUL-terminated or there were none despite pid's argc being > 0, essentially the system is in an invalid state and should be rebooted ASAP as the kernel is producing garbage output.
+.It Bq Er ESRCH
+The targeted pid doesn't exist.
+.It Bq Er EPERM
+User doesn't have permission to see targeted pid's args.
+.It Bq Er ENAMETOOLONG
+Targeted pid's args are too long (somehow longer than ARG_MAX) and cannot be parsed safely.
+.It Bq Er ERANGE
+Function was asked to skip more args than targeted pid has.
+.El
+.Sh THREAD SAFETY
+.No I believe Nm No is thread-safe under the following conditions: Xr errno 2 No is thread-local, Fn malloc No is thread safe, Fn sysctl No is thread safe, as is copying out of the buffer it populates; these conditions are met on all macOS versions I've tested. Note: the arguments passed into the functions in Nm No must not be modified (or freed) by other threads until after the functions return. Whether you use thread-local storage, or mutexes, or some other synchronization primitive, or separate blocks of shared memory, or some other approach, is up to you. Also note that: calling Fn print_argv_of_pid No from multiple threads may interleave the output, so you may want to use Fn flockfile stdout No to prevent this.
+.Sh PERFORMANCE
+.No I've spent a lot of time optimizing the performance of this library. All functions use the most efficient algorithm possible, and the fewest memory allocations possible. I've also benchmarked the functions I use from the C std library in order to choose the most optimized versions available. I regularly benchmark my code using hyperfine to test for performance regressions.
+.Pp
+.No The Fn get_argv_and_argc_of_pid No function may be slower than Fn get_argv_of_pid No as it must perform an additional Fn malloc Ns , though it has fewer conditionals per loop so if there are few arguments then it could wind up being faster. Both functions have the same time complexity: Fn O n No where Fa n No is the length of the arguments to pid in bytes.
+.Sh EXAMPLES
+The following programs show minimal use of the entire library API.
+.Bd -literal -offset indent
+.so test/src/libtest1.c
+.Ed
+\l'80─'
+.Bd -literal -offset indent
+.so test/src/libtest2.c
+.Ed
+.Sh SEE ALSO
+.Xr getargv 1 ,
+.Xr ps 1 ,
+.Xr errno 2 ,
+.Xr sysctl 3 ,
+.Xr stdbool.h 0p ,
+.Xr free 3
+.Sh STANDARDS
+The
+.Nm
+library conforms to the xnu kernel's
+.Dv KERN_PROCARGS2
+sysctl.
+.Sh LIST OF FUNCTIONS
+.Bl -column "Function" "Description"
+.It Sy "Function" Ta Sy "Description"
+.It Li "get_argv_of_pid" Ta "get the argv of the specified pid as a buffer"
+.It Li "get_argv_and_argc_of_pid" Ta "get the argc and argv of the specified pid in standard format"
+.It Li "print_argv_of_pid" Ta "print a contiguous stretch of memory to stdout, including any NULs"
+.It Li "free_ArgvResult" Ta "free the pointer in an ArgvResult struct using the correct free function"
+.It Li "free_ArgvArgcResult" Ta "free the pointers in an ArgvArgcResult struct using the correct free function"
+.El
+.Sh BUGS
+.No This library does not necessarily interact well with other libraries due to unilaterally defining Vt bool No if In stdbool.h isn't available. This is only a problem when compiling C in std < St -isoC-99 . If you do experience a conflict, you can remove the definition of bool from the header, so long as you only include the header after you define bool in your program.
+.Sh IMPLEMENTATION NOTES
+
+.Bl -bullet
+.It
+.No The current implementation of Fn print_argv_of_pid No does not facilitate printing to anything other than Va stdout .
+.It
+.No The current implementations of Fn get_argv_of_pid No and Fn get_argv_and_argc_of_pid No allocate memory, and do not facilitate alternate allocators.
+.It
+.No The current implementations of Fn get_argv_of_pid No and Fn get_argv_and_argc_of_pid No assume that you have not compiled your own xnu kernel with a custom Dv PID_MAX Ns ; if you have, you will need to compile
+.Nm
+.No with your custom Dv PID_MAX No set thus:
+.Pp
+.Bd -literal -offset indent
+$ make PID_MAX=__YOUR_CUSTOM_PID_MAX_HERE__ dylib
+.Ed
+.Pp
+.No Also, it is currently a hard requirement that Dv PID_MAX No < Dv ARG_MAX Ns .
+.El

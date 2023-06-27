@@ -1,0 +1,14 @@
+prefix=/usr/local
+includedir=${prefix}/include/getargv++
+libdir=${prefix}/lib
+
+Name: getargv++
+Description: Library for getting the arguments of other processes.
+URL: https://getargv.narzt.cam/
+Version: 0.1
+Requires: getargv
+Cflags: -I${includedir}
+Libs: -L${libdir} -lgetargv++
+# private is for static linking
+# Cflags.private: -I${includedir}
+# Libs.private: -L${libdir} -lgetargv

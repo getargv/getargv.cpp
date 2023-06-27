@@ -34,6 +34,23 @@ TMP_MANPAGE_3 := $(MANPAGE_3:$(MAN_DIR)/%=/tmp/%)
 
 dylib: $(DYLIB)
 
+install_dylib: $(DYLIB)
+	install -d $(PREFIX)/$(LIB_DIR)
+	install $(DYLIB) $(PREFIX)/$(DYLIB)
+	install_name_tool -id $(PREFIX)/$(DYLIB) $(PREFIX)/$(DYLIB)
+ifdef CERT_IDENTITY
+	codesign --options runtime --prefix=$(CODESIGN_PREFIX) -s "$(CERT_IDENTITY)" --keychain $(KEYCHAIN) $(PREFIX)/$(DYLIB)
+endif
+	ln -s ./$(DYLIB_FILENAME:%.$(VERSION).dylib=%.$(COMPAT_VERSION:%.0=%).dylib) $(PREFIX)/$(DYLIB:%.$(VERSION).dylib=%.dylib)
+	ln -s ./$(DYLIB_FILENAME) $(PREFIX)/$(DYLIB:%.$(VERSION).dylib=%.$(COMPAT_VERSION:%.0=%.dylib))
+	install -d $(PREFIX)/include/$(LIB_SHORT_NAME)
+	install -m 444 $(wildcard include/*.hpp) $(PREFIX)/include/$(LIB_SHORT_NAME)/
+	sed -e "/Copyright: see LICENSE file/r LICENSE" -e "/Copyright: see LICENSE file/d" -i '' $(PREFIX)/include/$(LIB_SHORT_NAME)/*.hpp
+	install -d $(PREFIX)/share/$(MAN_DIR)/man3
+	awk '{if ($$0 ~ /^\.so ([^ ]+)$$/) { while ((getline line < $$2) > 0) { gsub(/\\/, "\\\\", line); print "\\!", line }; close($$1) } else { print } }' $(MANPAGE_3) > $(TMP_MANPAGE_3)
+	install -m 444 $(TMP_MANPAGE_3) $(PREFIX)/share/$(MAN_DIR)/man3/
+	install -d $(PREFIX)/lib/pkgconfig/
+	install -m 444 $(LIB_SHORT_NAME).pc $(PREFIX)/lib/pkgconfig/
 
 $(DYLIB): $(OBJECTS) | $(LIB_DIR)
 	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -dynamiclib $^ -o $@
