@@ -1,8 +1,8 @@
-#ifndef ITERGEN
-#define ITERGEN
+#ifndef LIBGETARGVPLUSPLUS_ITERATOR_H
+#define LIBGETARGVPLUSPLUS_ITERATOR_H
 
 #include <iterator>
-namespace IterGen {
+namespace Getargv {
 
 template <typename T> struct Iterator {
 #if defined(__cplusplus) && (__cplusplus == 202002L)
@@ -81,5 +81,5 @@ template <typename T> struct Iterator {
 private:
   pointer _ptr;
 };
-} // namespace IterGen
+} // namespace Getargv
 #endif

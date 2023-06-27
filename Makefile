@@ -1,37 +1,55 @@
-LIBVER=$(shell vtool -show-build /usr/local/lib/libgetargv.dylib | awk '/minos/{print $$2}')
+LIBVER=$(shell vtool -show-build $(shell brew --prefix)/lib/libgetargv.dylib | awk '/minos/{print $$2}')
 export MACOSX_DEPLOYMENT_TARGET=$(LIBVER)
+VERSION=0.1
+COMPAT_VERSION := $(shell echo $(VERSION) | cut -f1 -d.).0
 
+CODESIGN_PREFIX := cam.narzt.
+KEYCHAIN := ~/Library/Keychains/login.keychain-db
+CERT_IDENTITY := $(shell security find-identity -v -p codesigning | sed -Ee 's/.*"([^"]+)".*/\1/g' | grep -Fve ' valid identit' -e ' CA')
+
+SRC_DIR = src
+OBJ_DIR = obj
+LIB_DIR = lib
+MAN_DIR = man
+
+PREFIX := /usr/local
 CXX=clang++
 CPPFLAGS += -MMD -MP
-CXXFLAGS := --std=c++20
+CXXFLAGS := --std=c++20 -O3 -Iinclude
+# must be c++20 or greater, before that c++ cannot correctly represent the semantics of this library, due to a change in copy/move semantics
 EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
 LDFLAGS += -Llib -fvisibility=default -fPIC
 LDLIBS += -lgetargv
 
-.PHONY := run db clean
-.DEFAULT_GOAL := run
+LIB_SHORT_NAME = getargv++
+DYLIB_FILENAME = lib$(LIB_SHORT_NAME).$(VERSION).dylib
+DYLIB = lib/$(DYLIB_FILENAME)
+SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
+OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+MANPAGE_3 := $(wildcard $(MAN_DIR)/*.3)
+TMP_MANPAGE_3 := $(MANPAGE_3:$(MAN_DIR)/%=/tmp/%)
 
-run: bin/main
-	bin/main
+.PHONY := db clean dylib install_dylib
+.DEFAULT_GOAL := dylib
 
-lib/libgetargv++.dylib: obj/argv.o obj/argvargc.o | lib
+dylib: $(DYLIB)
+
+
+$(DYLIB): $(OBJECTS) | $(LIB_DIR)
 	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -dynamiclib $^ -o $@
 
-bin/main: lib/libgetargv++.dylib obj/main.o | bin
-	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -lgetargv++ -fPIE $^ -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c -fPIC $< -o $@
 
-obj/%.o: src/%.cpp | obj
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(EXTRA_CXXFLAGS) -c $^ -o $@
-
-bin lib obj:
+$(OBJ_DIR) $(LIB_DIR):
 	mkdir -p $@
 
 db: compile_commands.json
 
 compile_commands.json: Makefile
-	bear -- make -B bin/main
+	bear -- make -B dylib
 
 clean:
-	@$(RM) -rf obj bin lib
+	@$(RM) -rf $(OBJ_DIR) $(LIB_DIR)
 
--include $(OBJ:.o=.d)
+-include $(OBJECTS:.o=.d)

@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <system_error>
 
-#include "libgetargv++.hpp"
+#include "../include/libgetargv++.hpp"
 
 namespace Getargv {
 
