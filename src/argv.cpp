@@ -1,12 +1,12 @@
-#include <cerrno>
-#include <stdexcept>
-#include <system_error>
-
 #include "../include/libgetargv++.hpp"
 
 namespace Getargv {
 
-Argv::Argv(const ffi::ArgvResult &r) : ffi::ArgvResult(r) {}
+Argv::Argv(ffi::ArgvResult &&r) : ffi::ArgvResult(r) {
+  r.buffer = nullptr;
+  r.end_pointer = nullptr;
+  r.end_pointer = nullptr;
+}
 Argv::~Argv() { ffi::free_ArgvResult(this); }
 
 bool Argv::print() {
@@ -35,21 +35,28 @@ char &Argv::operator[](const ptrdiff_t index) const {
   throw std::out_of_range("index was out of bounds");
 }
 
-Argv Argv::as_bytes(pid_t pid, unsigned int skip, bool nuls) noexcept(false) {
-  ffi::ArgvResult result;
+Argv::Argv(pid_t pid, unsigned int skip, bool nuls) noexcept(false) {
   ffi::GetArgvOptions options = {
-      .pid = pid, .skip = static_cast<ffi::uint>(skip), .nuls = nuls};
-  if (!ffi::get_argv_of_pid(&options, &result)) {
+      .pid = pid, .nuls = nuls, .skip = static_cast<ffi::uint>(skip)};
+  if (!ffi::get_argv_of_pid(&options, this)) {
     ffi::errno_t e = errno;
     throw std::system_error(e, std::generic_category());
   }
-  return Argv(result);
 }
+
+Argv Argv::as_bytes(pid_t pid, unsigned int skip, bool nuls) noexcept(false) {
+  return Argv(pid, skip, nuls);
+}
+
+std::string Argv::to_string() noexcept(false) {
+  return std::string(this->start_pointer, this->end_pointer);
+}
+
 std::string Argv::as_string(pid_t pid, unsigned int skip,
                             bool nuls) noexcept(false) {
-  Argv result = Argv::as_bytes(pid, skip, nuls);
+  Argv result(pid, skip, nuls);
 
-  return std::string(result.start_pointer, result.end_pointer);
+  return result.to_string();
 }
 
 } // namespace Getargv

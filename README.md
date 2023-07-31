@@ -1,32 +1,89 @@
 <h1><img src="logo.svg" width="200" alt="getargv"></h1>
 
 # -> placeholder for ci badge <-
+[![C++/make CI](https://github.com/getargv/getargv++/actions/workflows/actions.yml/badge.svg?event=push)](https://github.com/getargv/getargv++/actions/workflows/actions.yml)
 
-`libgetargv++` is a library that allows you to get the arguments that were passed to another running process on macOS. It is intended to provide roughly the same functionality as reading from `/proc/<pid>/cmdline` on Linux. On macOS this is done by parsing the output of the `KERN_PROCARGS2` sysctl, which is <abbr title="always, in my observation">very often</abbr> implemented [incorrectly](https://getargv.narzt.cam/hallofshame.html), due to the overlooked possibility of leading empty arguments passed to the target process. This crate is the Rust bindings for the `libgetargv` library.
+`libgetargv++` is a library that allows you to get the arguments that were passed to another running process on macOS. It is intended to provide roughly the same functionality as reading from `/proc/<pid>/cmdline` on Linux. On macOS this is done by parsing the output of the `KERN_PROCARGS2` sysctl, which is <span title="always, in my observation">very often</span> implemented [incorrectly](https://getargv.narzt.cam/hallofshame.html), due to the overlooked possibility of leading empty arguments passed to the target process.
+
+This is a library providing a more idiomatic C++ api wrapping the C api provided by libgetargv.
 
 ## Permissions
 
 `libgetargv++` can only see processes running as the same user by default, so be sure your process runs as the desired user (`setuid`, [`launchd.plist`](x-man-page://launchd.plist), [`sudo`](x-man-page://sudo)) or can [elevate privileges](https://developer.apple.com/library/archive/documentation/Security/Conceptual/SecureCodingGuide/Articles/AccessControl.html); n.b. elevating privileges safely is [extremely complicated](https://developer.apple.com/forums/thread/708765), and will be a target of privilege escalation attacks on macOS so be extremely careful if you go this route, better to defer to the user to elevate privileges for you as needed.
 
-## System Requirements
+## Installation
 
-macOS is required as this is a macOS specific `sysctl`, even BSD does not implement it. Your system must support `sysctl` and `KERN_PROCARGS2`, which probably means macOS [10.3](https://github.com/CamJN/xnu/blob/b52f6498893f78b034e2e00b86a3e146c3720649/bsd/sys/sysctl.h#L332) or later, though I haven't tested versions older than 10.7. You'll also need a non-ancient clang++ (c++11 is required, c++20 is the default target) you can override the c++ std by setting `CXXFLAGS="--std=c++11"`.
+### Step 1: Downloading
 
-## Building `libgetargv++`
+You can download a [prebuilt library with headers](http://url1), or an [installer package](http://url2) from GitHub.
+
+### Step 2: Installing
+
+The simplest way to install this lib is via homebrew, just run `brew tap getargv/tap` and then `brew install libgetargv++`. If you don't use homebrew, then the next easiest way to install this lib is if you downloaded the installer package, which you can simply double click to be guided through the installation via a wizard. If you want to have absolute controll over the installation you can unpack the prebuilt library downloaded from github and put it somewhere your compiler will pick it up, such as `/usr/local/lib` and put the headers somewhere like `/usr/local/include/libgetargv++`.
+
+### Step 3: Environment
+
+Be sure that your compiler can find this lib by checking the library and
+header search paths:
+
+```bash
+echo | clang++ -c -v -x c++ - 2>&1 | sed -Ee '/search starts here/,/End of search list/!d;/End of search list/q'
+```
+
+\attention On Apple Silicon macs, homebrew installs native packages in /opt,
+and puts intel libraries in /usr/local, so your compiler will only
+automatically pick up Intel libraries, which is almost certainly not what you
+want. You need to explicitely exclude /usr/local from your search paths in
+this case and add /opt/.
+
+### System Requirements
+
+macOS is required as this is a macOS specific `sysctl`, even BSD does not implement it. Your system must support `sysctl` and `KERN_PROCARGS2`, which probably means macOS [10.3](https://github.com/CamJN/xnu/blob/b52f6498893f78b034e2e00b86a3e146c3720649/bsd/sys/sysctl.h#L332) or later, though I haven't tested versions older than 10.7. You'll also need a non-ancient clang++ (c++11 is required, c++20 is the default target) you can override the c++ std by setting `CXXFLAGS="--std=c++11 -O3 -Iinclude"`.
+
+## Building libgetargv++
 
 To make `libgetargv++`:
 
  - Install `libgetargv` to your system (see below).
- - Clone this repo and run `make`.
+ - Clone [this repo](https://github.com/getargv/getargv++) and run `make`.
 
-## Building `libgetargv`
+## Building libgetargv
 
-To make `getargv` Clone the repo and run `make`; to make `libgetargv` run `make dylib`.
+To make `libgetargv` Clone [the repo](https://github.com/getargv/getargv) and run `make dylib`.
 
-I've built `getargv` and `libgetargv` on macOS 10.7-12, using only the CLT package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 release`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
+I've built `libgetargv` on macOS 10.7-13, using only the CLT package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
 
 ## Testing
 
 Run `make -C test`.
 
-I've tested getargv on macOS 10.7-13, and run CI against all available Github hosted macOS runners, with plans to standup a CI cluster of VMs once I aquire apropriate hardware.
+I've tested libgetargv++ on macOS 10.7-13, and run CI against all available Github hosted macOS runners, with plans to standup a CI cluster of VMs once I aquire apropriate hardware.
+
+## Usage
+
+### Step 1: Choosing a struct
+
+Do you just want to print the arguments to stdout or look at the bytes of the arguments? Then you probably want the Argv struct, if you want to look at or parse the arguments, then you probably want the ArgvArgc struct. If you need to pass along the arguments to other functions that expect standard C++ types, then there are functions to give you those, however they are a bit less efficient as they involve additional copies.
+
+### Step 2: Choosing a constructor
+
+If you want to get a c++ type then `Argv::as_string()` or ArgvArgc::as_string_array()` are your friends, if you want just the bytes, then `Argv()` or `Argv::as_bytes()` are for you, and if you want to look at the args individually then `ArgvArgc()` or `ArgvArgc::as_array()` are what you want.
+
+### Step 3: Iterating
+
+Once you have a struct, you can iterate over its contents in the usual way, for example:
+
+```cpp
+auto args = ArgvArgc(getpid());
+for (auto arg : args) {
+std::cout << arg << "\n";
+}
+auto bytes = Argv(getpid());
+for (auto byte : bytes) {
+std::cout << byte;
+}
+```
+
+## Safety
+
+This library attempts to provide guardrails where possible to avoid undefined behaviour, but C++ is not very well suited to the task, so care must still be taken.

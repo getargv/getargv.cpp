@@ -1,0 +1,8 @@
+command alias alias command alias
+alias echo platform shell echo
+alias unalias command unalias
+alias import command script import
+alias connect gdb-remote
+echo 'to connect to server: connect port'
+echo 'to dump memory: parray len ptr'
+#echo 'target modules add /usr/local/lib/libcriterion.dylib --symfile /usr/local/opt/criterion/lib/libcriterion.dylib.dSYM'

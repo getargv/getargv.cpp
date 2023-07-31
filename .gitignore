@@ -4,6 +4,10 @@ compile_commands.json
 /bin
 /obj
 /lib
-test/bin
-test/lib
-test/share
+/docs
+/test/bin
+/test/coverage
+/test/lib
+/test/obj
+/test/share
+default.profraw
