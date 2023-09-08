@@ -21,7 +21,7 @@ ArgvArgc::Iterator ArgvArgc::end() const {
 char *&ArgvArgc::operator[](const ptrdiff_t index) const {
   auto count = this->size();
   if (count > 0) {
-    if (index < 0 && index > (-1 * count)) {
+    if (index < 0 && index >= (-1 * count)) {
       return argv[count + index];
     } else if (index >= 0 && index < count) {
       return argv[index];
