@@ -220,9 +220,10 @@ struct Argv : protected ffi::ArgvResult {
    * (whether ␀ bytes or spaces) from the first argument not skipped over, to
    * the last.
    *
-   * \returns a boolean indicating success (true) or failure (false).
+   * \throw std::system_error If printing fails, an exception is
+   * thrown containing the errno.
    */
-  bool print();
+  void print();
 };
 
 /** \brief This struct provides an iterable representation of the arguments of
@@ -234,7 +235,6 @@ struct Argv : protected ffi::ArgvResult {
  * libgetargv. You create this struct with the as_array() function. This struct
  * adds the following functionality to the C struct:
  * \li It provides an iterator over the arguments.
- * \li You can call print on the struct directly.
  * \li It reports its size, and if it is empty.
  * \li It cleans up the backing buffers automatically using the correct free
  * function.
