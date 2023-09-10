@@ -31,7 +31,7 @@ $(BIN_DIR)/benchmark: CXXFLAGS += -I ../src/ -fblocks
 $(BIN_DIR)/lib_unit_tests: CPPFLAGS := -MMD -MP -fvisibility=hidden
 $(BIN_DIR)/lib_unit_tests: CXXFLAGS += -fblocks -I $(BREW_PREFIX)/include -O0 -g3 -fcoverage-mapping $(SANI_FLAGS)
 $(BIN_DIR)/lib_unit_tests: EXE      := $(BIN_DIR)/lib_unit_tests
-$(BIN_DIR)/lib_unit_tests: LDLIBS   := -l criterion $(SANI_FLAGS)
+$(BIN_DIR)/lib_unit_tests: LDLIBS   := -l criterion -l getargv $(SANI_FLAGS)
 $(BIN_DIR)/lib_unit_tests: LDFLAGS  := -L $(BREW_PREFIX)/lib
 
 # test building with library, phony targets can't use % pattern when declaring deps, thus the non-DRY rules
