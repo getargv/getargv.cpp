@@ -69,7 +69,7 @@ $(COV_DIR)/%.profdata: $(BIN_DIR)/% | $(COV_DIR) $(BIN_DIR)/child
 	/usr/bin/xcrun -r llvm-cov report --summary-only --instr-profile=$@ --ignore-filename-regex='(unit_test|criterion)' $< $(PRIMARY_SOURCEFILE)
 
 %_coverage_report: $(COV_DIR)/%.profdata | $(BIN_DIR)/%
-	/usr/local/opt/llvm/bin/llvm-cov show --instr-profile=$< --show-expansions --show-branches=count --show-line-counts-or-regions $| $(PRIMARY_SOURCEFILE)
+	/usr/bin/xcrun -r llvm-cov show --instr-profile=$< --show-expansions --show-branches=count --show-line-counts-or-regions $| $(PRIMARY_SOURCEFILE)
 	/usr/bin/xcrun -r llvm-cov report --summary-only --instr-profile=$< --ignore-filename-regex='(unit_test|criterion)' $| $(PRIMARY_SOURCEFILE)
 
 $(LIB_DIR)/%.dylib:

@@ -71,15 +71,18 @@ pid_t varargs_spawn(const char *executable, ...);
 
 #define cr_strdup(str_arg) inner_strdup(str_arg, sizeof(str_arg))
 #define spawn(...) varargs_spawn(__VA_ARGS__, NULL)
+#define cleanup(callback) __attribute__((__cleanup__(callback)))
 
 struct get_argv_and_argc_of_pid_test_case {
   uint argc;
   const char *argv[5];
 };
+typedef struct get_argv_and_argc_of_pid_test_case test_case;
 
 void free_strings(criterion_test_params *crp);
 void free_double_strings(criterion_test_params *crp);
 void free_parse_args(criterion_test_params *crp);
 void free_sysctl_return(criterion_test_params *crp);
 void free_argv_argc_test_case(criterion_test_params *crp);
-void initialize_argv_argc_test_case(get_argv_and_argc_of_pid_test_case *ptr);
+void initialize_argv_argc_test_case(test_case *ptr);
+void kill_pid(pid_t* pid);

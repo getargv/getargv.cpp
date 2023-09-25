@@ -104,7 +104,7 @@ char *inner_strdup(const char *str, size_t size) {
   testing, you have to pass the path to the executable, and then all the
   arguments, argv[0] (usually but not always the name of the executable), all
   arguments must be strings
-*/
+ */
 pid_t varargs_spawn(const char *executable, ...) {
   va_list val;
   const char **args = NULL;
@@ -130,11 +130,11 @@ pid_t varargs_spawn(const char *executable, ...) {
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored                                               \
-    "-Wincompatible-pointer-types-discards-qualifiers"
-  return array_spawn(executable, (char *const *)args);
+  "-Wincompatible-pointer-types-discards-qualifiers"
+return array_spawn(executable, (char *const *)args);
 #pragma clang diagnostic pop
 
-  _Exit(EXIT_FAILURE);
+_Exit(EXIT_FAILURE);
 }
 
 pid_t array_spawn(const char *executable, char *const *argv) {
@@ -150,32 +150,38 @@ pid_t array_spawn(const char *executable, char *const *argv) {
   pid_t pid = fork();
   if (pid != 0) {
     sigsuspend(&emptymask); // wait for child to be ready
+    cr_assert_neq(pid, -1);
     return pid;
   }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored                                               \
-    "-Wincompatible-pointer-types-discards-qualifiers"
-  execv(executable, argv);
+  "-Wincompatible-pointer-types-discards-qualifiers"
+execv(executable, argv);
 #pragma clang diagnostic pop
-  perror("child");
-  _Exit(EXIT_FAILURE);
+perror("child");
+_Exit(EXIT_FAILURE);
 }
 
-void initialize_argv_argc_test_case(
-    struct get_argv_and_argc_of_pid_test_case *ptr) {
-  ptr->argc = 0;
-  for (size_t i = 0; i < 5; i++) {
-    ptr->argv[i] = NULL;
-  }
+std::string get_stdout() {
+  fflush(stdout);
+  FILE *f_stdout = cr_get_redirected_stdout();
+  size_t size = 1024 * 8;
+  char buffer[size];
+  char *head = buffer;
+  size_t read = 0;
+
+  do {
+    read = fread(head, 1, size - (head - buffer), f_stdout);
+    head += read;
+  } while (read > 0 && (head - buffer) < size);
+  return std::string(buffer, (head - buffer));
 }
 
 ParameterizedTestParameters(argv_argc, successful) {
   size_t nb_params = 7;
 
-  struct get_argv_and_argc_of_pid_test_case *params =
-      (get_argv_and_argc_of_pid_test_case *)cr_malloc(
-          sizeof(struct get_argv_and_argc_of_pid_test_case) * nb_params);
+  test_case *params = (test_case *)cr_malloc(sizeof(test_case) * nb_params);
 
   char *empt = cr_strdup("");
   char *oneA = cr_strdup("a");
@@ -206,50 +212,47 @@ ParameterizedTestParameters(argv_argc, successful) {
   params[6].argv[0] = empt;
   params[6].argv[1] = oneA;
 
-  return cr_make_param_array(get_argv_and_argc_of_pid_test_case, params,
-                             nb_params, free_argv_argc_test_case);
+  return cr_make_param_array(test_case, params, nb_params,
+                             free_argv_argc_test_case);
 }
 
-ParameterizedTest(get_argv_and_argc_of_pid_test_case *param, argv_argc,
-                  successful) {
+ParameterizedTest(test_case *param, argv_argc, successful) {
 
-  pid_t pid = array_spawn("bin/child", (char *const *)param->argv);
-  cr_assert_neq(pid, -1);
+  cleanup(kill_pid) pid_t pid =
+    array_spawn("bin/child", (char *const *)param->argv);
 
   cr_assert_no_throw(
-      {
-        Getargv::ArgvArgc results(pid);
-        cr_assert_eq(results.size(), param->argc);
-        cr_assert_eq(results.empty(), param->argc == 0);
-        for (int i = 0; i < param->argc; i++) {
-          cr_expect_str_eq(results[i], param->argv[i],
-                           "#%d: actual='%s' expected='%s'", param->argc,
-                           results[i], param->argv[i]);
+                     {
+                       Getargv::ArgvArgc results(pid);
+                       cr_assert_eq(results.size(), param->argc);
+                       cr_assert_eq(results.empty(), param->argc == 0);
+                       for (int i = 0; i < param->argc; i++) {
+                         cr_expect_str_eq(results[i], param->argv[i],
+                                          "#%d: actual='%s' expected='%s'", param->argc,
+                                          results[i], param->argv[i]);
 
-          int index = (i + 1) * -1;
-          std::string actual = results[index];
-          std::string expected = param->argv[(int)param->argc + index];
-          cr_expect_eq(actual, expected, "actual='%s' expected='%s'",
-                       actual.c_str(), expected.c_str());
-        }
-        size_t i = 0;
-        for (auto arg : results) {
-          cr_expect_str_eq(arg, param->argv[i],
-                           "#%d: actual='%s' expected='%s'", param->argc, arg,
-                           param->argv[i]);
-          i++;
-        }
-      },
-      std::system_error);
+                         int index = (i + 1) * -1;
+                         std::string actual = results[index];
+                         std::string expected = param->argv[(int)param->argc + index];
+                         cr_expect_eq(actual, expected, "actual='%s' expected='%s'",
+                                      actual.c_str(), expected.c_str());
+                       }
+                       size_t i = 0;
+                       for (auto arg : results) {
+                         cr_expect_str_eq(arg, param->argv[i],
+                                          "#%d: actual='%s' expected='%s'", param->argc, arg,
+                                          param->argv[i]);
+                         i++;
+                       }
+                     },
+                     std::system_error);
   kill(pid, SIGTERM); // signal to child to be done
 }
 
 ParameterizedTestParameters(print_argv_of_pid, successful) {
   size_t nb_params = 6;
 
-  get_argv_and_argc_of_pid_test_case *params =
-      (get_argv_and_argc_of_pid_test_case *)cr_malloc(
-          sizeof(get_argv_and_argc_of_pid_test_case) * nb_params);
+  test_case *params = (test_case *)cr_malloc(sizeof(test_case) * nb_params);
 
   initialize_argv_argc_test_case(&params[0]);
   params[0].argv[0] = cr_strdup("print me");
@@ -277,88 +280,156 @@ ParameterizedTestParameters(print_argv_of_pid, successful) {
   params[5].argv[0] = cr_strdup("");
   params[5].argc = 1;
 
-  return cr_make_param_array(get_argv_and_argc_of_pid_test_case, params,
-                             nb_params, free_argv_argc_test_case);
+  return cr_make_param_array(test_case, params, nb_params,
+                             free_argv_argc_test_case);
 }
 
-ParameterizedTest(get_argv_and_argc_of_pid_test_case *param, print_argv_of_pid,
-                  successful, .init = cr_redirect_stdout) {
-  pid_t pid = array_spawn("bin/child", (char *const *)param->argv);
-  cr_assert_neq(pid, -1);
+ParameterizedTest(test_case *param, print_argv_of_pid, successful,
+                  .init = cr_redirect_stdout) {
+  cleanup(kill_pid) pid_t pid =
+    array_spawn("bin/child", (char *const *)param->argv);
 
-  cr_assert_no_throw(
-      {
-        try {
-          Getargv::Argv args(pid);
-          cr_assert(args.print());
-          fflush(stdout);
-        } catch (std::system_error e) {
-          cr_log_error("'%s'[%d] error %d:'%s'",
-                       param->argc > 0 ? param->argv[0] : "empty arg array",
-                       param->argc, e.code().value(), e.what());
-          throw e;
-        }
+  cr_assert_no_throw(Getargv::Argv(pid).print(), std::system_error);
+  std::string actual = get_stdout();
+  std::string expected;
+  for (int i = 0; i < param->argc; i++) {
+    auto a = param->argv[i];
+    expected += a;
+    expected += "\0"s;
+  }
 
-        FILE *f_stdout = cr_get_redirected_stdout();
-        size_t size = 1024 * 8;
-        char buffer[size];
-        char *head = buffer;
-        size_t read = 0;
+  cr_assert_eq(actual, expected, "actual: '%.*s'[%ld] != expected: '%.*s'[%ld]",
+               (int)actual.size(), actual.c_str(), actual.size(),
+               (int)expected.size(), expected.c_str(), expected.size());
+}
 
-        do {
-          read = fread(head, 1, size - (head - buffer), f_stdout);
-          head += read;
-        } while (read > 0 && (head - buffer) < size);
-        std::string actual(buffer, (head - buffer));
+Test(print_argv_of_pid, failure) {
+  std::string empty = "";
+  const char *argv[] = {empty.c_str(), nullptr};
+  cleanup(kill_pid) pid_t pid = array_spawn("bin/child", (char *const *)argv);
 
-        std::string expected;
-        for (int i = 0; i < param->argc; i++) {
-          auto a = param->argv[i];
-          expected += a;
-          expected += "\0"s;
-        }
+  fclose(stdout);
+  cr_assert_throw(Getargv::Argv(pid).print(), std::system_error);
+}
 
-        cr_assert_eq(actual, expected,
-                     "actual: '%.*s'[%ld] != expected: '%.*s'[%ld]",
-                     (int)actual.size(), actual.c_str(), actual.size(),
-                     (int)expected.size(), expected.c_str(), expected.size());
-      },
-      std::system_error, "error thrown");
+ParameterizedTestParameters(argv_of_pid_empty, correct) {
+  size_t nb_params = 3;
+
+  test_case *params = (test_case *)cr_malloc(nb_params * sizeof(test_case));
+
+  initialize_argv_argc_test_case(&params[0]);
+  params[0].argv[0] = cr_strdup("not empty");
+  params[0].argc = 1;
+
+  initialize_argv_argc_test_case(&params[1]);
+  params[1].argv[0] = cr_strdup("");
+  params[1].argc = 1;
+
+  initialize_argv_argc_test_case(&params[2]);
+
+  return cr_make_param_array(test_case, params, nb_params,
+                             free_argv_argc_test_case);
+}
+
+ParameterizedTest(test_case *param, argv_of_pid_empty, correct) {
+  cleanup(kill_pid) pid_t pid =
+    array_spawn("bin/child", (char *const *)param->argv);
+
+  cr_assert_eq(Getargv::Argv::as_bytes(pid).empty(), param->argc == 0,
+               "empty() was wrong, should be %s",
+               param->argc == 0 ? "true" : "false");
+}
+
+Test(argv_of_pid_indexing, works) {
+  std::string expected = "abcdefghijklmnopqrstuvwxyz";
+  const char *argv[] = {expected.c_str(), nullptr};
+  cleanup(kill_pid) pid_t pid = array_spawn("bin/child", (char *const *)argv);
+
+  Getargv::Argv args(pid);
+  for (int i = 0; i < expected.size(); i++) {
+    cr_assert_eq(args[i], argv[0][i]);
+  }
+  for (int i = 1; i <= expected.size(); i++) {
+    cr_assert_eq(args[i * -1], argv[0][expected.size() - i]);
+  }
+}
+
+Test(argv_of_pid_indexing, failure) {
+  const char *argv[] = {"", nullptr};
+  cleanup(kill_pid) pid_t pid = array_spawn("bin/child", (char *const *)argv);
+
+  Getargv::Argv args(pid);
+  cr_assert_throw(args[100000], std::out_of_range);
+}
+Test(argv_argc_of_pid_indexing, failure) {
+  const char *argv[] = {"", nullptr};
+  cleanup(kill_pid) pid_t pid = array_spawn("bin/child", (char *const *)argv);
+
+  Getargv::ArgvArgc args(pid);
+  cr_assert_throw(args[100000], std::out_of_range);
+}
+
+Test(argv_as_string, works) {
+  std::string expected = "abcdefghijklmnopqrstuvwxyz";
+  const char *argv[] = {expected.c_str(), nullptr};
+  cleanup(kill_pid) pid_t pid = array_spawn("bin/child", (char *const *)argv);
+
+  std::string actual = Getargv::Argv::as_string(pid);
+  cr_assert_eq(actual, expected);
 }
 
 Test(argv_argc, to_string_array) {
-  pid_t pid = spawn("bin/child", "bin/child");
-  cr_assert_neq(pid, -1);
+  cleanup(kill_pid) pid_t pid = spawn("bin/child", "bin/child");
 
   cr_assert_no_throw(
-      {
-        Getargv::ArgvArgc results(pid);
-        std::vector<std::string> a = results.to_string_array();
-      },
-      std::system_error, "error thrown");
+                     {
+                       Getargv::ArgvArgc results(pid);
+                       std::vector<std::string> a = results.to_string_array();
+                     },
+                     std::system_error, "error thrown");
+}
+
+Test(argv_argc, as_string_array) {
+  cleanup(kill_pid) pid_t pid = spawn("bin/child", "bin/child");
+
+  cr_assert_no_throw(Getargv::ArgvArgc::as_string_array(pid), std::system_error,
+                     "error thrown");
+}
+
+Test(argv, convert_from_ffi_type) {
+  auto fn = []() -> Getargv::ffi::ArgvResult {
+    return Getargv::ffi::ArgvResult();
+  };
+  Getargv::Argv a(fn());
+}
+Test(argv_argc, convert_from_ffi_type) {
+  auto fn = []() -> Getargv::ffi::ArgvArgcResult {
+    return Getargv::ffi::ArgvArgcResult();
+  };
+  Getargv::ArgvArgc a(fn());
 }
 
 Test(argv_argc, fail_find_procargs) {
-  cr_assert_throw({ Getargv::ArgvArgc result(-1); }, std::system_error);
+  cr_assert_throw({ Getargv::ArgvArgc::as_array(-1); }, std::system_error);
 }
 
 Test(argv_argc, fail_perm_procargs) {
-  cr_assert_throw({ Getargv::ArgvArgc result(0); }, std::system_error);
+  cr_assert_throw({ Getargv::ArgvArgc::as_array(0); }, std::system_error);
 }
 
 Test(argv, simple) {
   std::string expected = "bin/child\0"s;
-  pid_t pid = spawn(expected.c_str(), expected.c_str());
+  cleanup(kill_pid) pid_t pid = spawn(expected.c_str(), expected.c_str());
 
   cr_expect_no_throw(
-      {
-        Getargv::Argv proc_ptrs(pid, 0, true);
-        cr_assert_eq(proc_ptrs.size(), expected.size());
-        std::string actual(proc_ptrs.begin(), proc_ptrs.end());
-        cr_assert_eq(actual, expected);
-      },
-      std::system_error,
-      "Argv constructor threw an exception when it shouldn't have");
+                     {
+                       Getargv::Argv proc_ptrs(pid, 0, true);
+                       cr_assert_eq(proc_ptrs.size(), expected.size());
+                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       cr_assert_eq(actual, expected);
+                     },
+                     std::system_error,
+                     "Argv constructor threw an exception when it shouldn't have");
 
   kill(pid, SIGTERM); // signal to child to be done
 }
@@ -366,17 +437,17 @@ Test(argv, simple) {
 Test(argv, nuls_false) {
   std::string expected = "one\0two\0three\0"s;
 
-  pid_t pid = spawn("bin/child", "one", "two", "three");
+  cleanup(kill_pid) pid_t pid = spawn("bin/child", "one", "two", "three");
 
   cr_expect_no_throw(
-      {
-        Getargv::Argv proc_ptrs(pid, 0, false);
-        cr_assert_eq(proc_ptrs.size(), expected.size());
-        std::string actual(proc_ptrs.begin(), proc_ptrs.end());
-        cr_assert_eq(actual, expected);
-      },
-      std::system_error,
-      "Argv constructor threw an exception when it shouldn't have");
+                     {
+                       Getargv::Argv proc_ptrs(pid, 0, false);
+                       cr_assert_eq(proc_ptrs.size(), expected.size());
+                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       cr_assert_eq(actual, expected);
+                     },
+                     std::system_error,
+                     "Argv constructor threw an exception when it shouldn't have");
 
   kill(pid, SIGTERM); // signal to child to be done
 }
@@ -385,49 +456,50 @@ Test(argv, nuls_true) {
 
   std::string expected = "bin/tests --verbose 2 -j1\0"s;
 
-  pid_t pid = spawn("bin/child", "bin/tests", "--verbose", "2", "-j1");
+  cleanup(kill_pid) pid_t pid =
+    spawn("bin/child", "bin/tests", "--verbose", "2", "-j1");
 
   cr_expect_no_throw(
-      {
-        Getargv::Argv proc_ptrs(pid, 0, true);
-        cr_assert_eq(proc_ptrs.size(), expected.size());
-        std::string actual(proc_ptrs.begin(), proc_ptrs.end());
-        cr_assert_eq(actual, expected);
-      },
-      std::system_error);
+                     {
+                       Getargv::Argv proc_ptrs(pid, 0, true);
+                       cr_assert_eq(proc_ptrs.size(), expected.size());
+                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       cr_assert_eq(actual, expected);
+                     },
+                     std::system_error);
   kill(pid, SIGTERM); // signal to child to be done
 }
 
 Test(argv, skip_one) {
   cr_assert_no_throw(
-      {
-        Getargv::Argv proc_ptrs(getppid(), 1, false);
+                     {
+                       Getargv::Argv proc_ptrs(getppid(), 1, false);
 
-        cr_assert_neq(proc_ptrs.size(), 0);
-        cr_expect_eq(*--proc_ptrs.end(), '\0'); // end of args to print
-        cr_expect_lt(proc_ptrs.begin(), proc_ptrs.end()); // whole buffer
+                       cr_assert_neq(proc_ptrs.size(), 0);
+                       cr_expect_eq(*--proc_ptrs.end(), '\0'); // end of args to print
+                       cr_expect_lt(proc_ptrs.begin(), proc_ptrs.end()); // whole buffer
 
-        std::string buf1 = "--verbose\0002\0-j1"s;
-        std::string buf2 = "-j0\0"s;
-        std::string expected = (criterion_options.jobs > 0) ? buf1 : buf2;
-        std::string actual(proc_ptrs.begin(), proc_ptrs.end());
-        cr_assert_eq(actual, expected, "'%.*s'[%ld] != '%.*s'[%ld]",
-                     (int)actual.size(), actual.c_str(), actual.size(),
-                     (int)expected.size(), expected.c_str(), expected.size());
-      },
-      std::system_error);
+                       std::string buf1 = "--verbose\0002\0-j1"s;
+                       std::string buf2 = "-j0\0"s;
+                       std::string expected = (criterion_options.jobs > 0) ? buf1 : buf2;
+                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       cr_assert_eq(actual, expected, "'%.*s'[%ld] != '%.*s'[%ld]",
+                                    (int)actual.size(), actual.c_str(), actual.size(),
+                                    (int)expected.size(), expected.c_str(), expected.size());
+                     },
+                     std::system_error);
 }
 
 Test(argv, skip_all) {
   int skip = (criterion_options.jobs > 0) ? 4 : 2;
 
   cr_assert_no_throw(
-      {
-        Getargv::Argv proc_ptrs(getppid(), skip, false);
+                     {
+                       Getargv::Argv proc_ptrs(getppid(), skip, false);
 
-        cr_expect_eq(proc_ptrs.size(), 0);
-      },
-      std::system_error);
+                       cr_expect_eq(proc_ptrs.size(), 0);
+                     },
+                     std::system_error);
 }
 
 Test(argv, skip_too_many) {
@@ -460,10 +532,19 @@ void free_strings(struct criterion_test_params *crp) {
 }
 
 void free_argv_argc_test_case(struct criterion_test_params *crp) {
-  struct get_argv_and_argc_of_pid_test_case *params =
-      (struct get_argv_and_argc_of_pid_test_case *)crp->params;
+  test_case *params = (test_case *)crp->params;
   for (size_t i = 0; i < crp->length; ++i) {
     cr_free(params[i].argv);
   }
   cr_free(params);
+}
+
+void initialize_argv_argc_test_case(test_case *ptr) {
+  ptr->argc = 0;
+  for (size_t i = 0; i < 5; i++) {
+    ptr->argv[i] = NULL;
+  }
+}
+void kill_pid(pid_t *pid) {
+  kill(*pid, SIGTERM); // signal to child to be done
 }

@@ -24,7 +24,9 @@ namespace Getargv {
   ptrdiff_t Argv::size() const {
     return (empty() ? 0 : end_pointer - start_pointer + 1);
   }
-  bool Argv::empty() const { return (start_pointer == end_pointer); }
+  bool Argv::empty() const {
+    return (start_pointer == nullptr || end_pointer == nullptr);
+  }
 
   char &Argv::operator[](const ptrdiff_t index) const {
     auto count = this->size();
