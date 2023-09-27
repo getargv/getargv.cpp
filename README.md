@@ -5,7 +5,7 @@
 
 `libgetargv++` is a library that allows you to get the arguments that were passed to another running process on macOS. It is intended to provide roughly the same functionality as reading from `/proc/<pid>/cmdline` on Linux. On macOS this is done by parsing the output of the `KERN_PROCARGS2` sysctl, which is <span title="always, in my observation">very often</span> implemented [incorrectly](https://getargv.narzt.cam/hallofshame.html), due to the overlooked possibility of leading empty arguments passed to the target process.
 
-This is a library providing a more idiomatic C++ api wrapping the C api provided by libgetargv.
+This is a library providing a more idiomatic C++ API wrapping the C API provided by libgetargv.
 
 ## Permissions
 
@@ -15,26 +15,25 @@ This is a library providing a more idiomatic C++ api wrapping the C api provided
 
 ### Step 1: Downloading
 
-You can download a [prebuilt library with headers](http://url1), or an [installer package](http://url2) from GitHub.
+You can download a [pre-built library with headers](http://url1), or an [installer package](http://url2) from GitHub.
 
 ### Step 2: Installing
 
-The simplest way to install this lib is via homebrew, just run `brew tap getargv/tap` and then `brew install libgetargv++`. If you don't use homebrew, then the next easiest way to install this lib is if you downloaded the installer package, which you can simply double click to be guided through the installation via a wizard. If you want to have absolute controll over the installation you can unpack the prebuilt library downloaded from github and put it somewhere your compiler will pick it up, such as `/usr/local/lib` and put the headers somewhere like `/usr/local/include/libgetargv++`.
+The simplest way to install this lib is via homebrew, just run `brew tap getargv/tap` and then `brew install libgetargv++`. If you don't use homebrew, then the next easiest way to install this lib is if you downloaded the installer package, which you can simply double click to be guided through the installation via a wizard. If you want to have absolute control over the installation you can unpack the pre-built library downloaded from GitHub and put it somewhere your compiler will pick it up, such as `/usr/local/lib` and put the headers somewhere like `/usr/local/include/libgetargv++`.
 
 ### Step 3: Environment
 
-Be sure that your compiler can find this lib by checking the library and
-header search paths:
+Be sure that your compiler can find this lib by checking the library and header search paths:
 
 ```bash
 echo | clang++ -c -v -x c++ - 2>&1 | sed -Ee '/search starts here/,/End of search list/!d;/End of search list/q'
 ```
 
-\attention On Apple Silicon macs, homebrew installs native packages in /opt,
-and puts intel libraries in /usr/local, so your compiler will only
+\attention On Apple Silicon macs, homebrew installs native packages in `/opt`,
+and puts Intel libraries in `/usr/local`, so your compiler will only
 automatically pick up Intel libraries, which is almost certainly not what you
-want. You need to explicitely exclude /usr/local from your search paths in
-this case and add /opt/.
+want. You need to explicitly exclude `/usr/local` from your search paths in
+this case and add `/opt/`.
 
 ### System Requirements
 
@@ -57,7 +56,7 @@ I've built `libgetargv` on macOS 10.7-13, using only the CLT package, not the fu
 
 Run `make -C test`.
 
-I've tested libgetargv++ on macOS 10.7-13, and run CI against all available Github hosted macOS runners, with plans to standup a CI cluster of VMs once I aquire apropriate hardware.
+I've tested libgetargv++ on macOS 10.7-13, and run CI against all available GitHub hosted macOS runners, with plans to standup a CI cluster of VMs once I acquire appropriate hardware.
 
 ## Usage
 
