@@ -11,3 +11,4 @@ compile_commands.json
 /test/obj
 /test/share
 default.profraw
+/test/include

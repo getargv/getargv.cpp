@@ -15,7 +15,8 @@ PREFIX := /usr/local
 CXX=clang++
 CPPFLAGS += -MMD -MP
 CXXFLAGS := --std=c++20 -O3 -Iinclude
-# must be c++20 or greater, before that c++ cannot correctly represent the semantics of this library, due to a change in copy/move semantics
+# supported: c++11, c++14, c++17, c++20
+# future: c++2b
 EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
 LDFLAGS += -Llib -fvisibility=default -fPIC
 LDLIBS += -lgetargv

@@ -4,19 +4,20 @@
 #include <iterator>
 namespace Getargv {
 
-/** \brief A template that turns a pointer to a C style array into a C++
- * contiguous iterator.
- *
- * The type parameter for this template is the \ref element_type that the C
- * array's pointer points to. The generated Iterator struct is a contiguous
- * iterator since C++ 20, and a random access iterator in C++ versions
- * prior to C++ 20.
- *
- * All operations are pointer math, which is a big reason why this is a
- * template, so I only have to make sure one impl works.
- */
-template <typename T> struct Iterator {
-#if defined(__cplusplus) && (__cplusplus == 202002L)
+  /** \brief A template that turns a pointer to a C style array into a C++
+   * contiguous iterator.
+   *
+   * The type parameter for this template is the \ref element_type that the C
+   * array's pointer points to. The generated Iterator struct is a contiguous
+   * iterator since C++ 20, and a random access iterator in C++ versions
+   * prior to C++ 20.
+   *
+   * All operations are pointer math, which is a big reason why this is a
+   * template, so I only have to make sure one impl works.
+   */
+  template <typename T>
+struct Iterator {
+#if defined(__cplusplus) && (__cplusplus >= 202002L)
   /** \brief A marker for the capabilities of this Iterator.
    * This is the strongest type of iterator in C++ >= 20, and we can satisfy the
    * requirements, so users can use this Iterator with as many algorithms from
@@ -54,14 +55,14 @@ template <typename T> struct Iterator {
   /** \brief The type of a pointer to an element this Iterator provides access
    * to.
    */
-  using pointer = element_type *;
+  using pointer = element_type*;
 
   /** \brief The type of a reference to an element this Iterator provides access
    * to.
    * \warning Trying to create a reference from an end Iterator or an Iterator
    * that has been incremented or decremented beyond the underlying array is UB.
    */
-  using reference = element_type &;
+  using reference = element_type&;
 
   /** \brief The default constructor.
    * This constructor creates an empty iterator with no backing buffer. The
@@ -72,7 +73,7 @@ template <typename T> struct Iterator {
 
   /** \brief A constructor that takes a pointer (C array).
    *
-   * \param p A pointer to an array of values/elements of \ref element_type, or
+   * \param ptr A pointer to an array of values/elements of \ref element_type, or
    * 1 past the end of the array in the case of the end iterator.
    *
    * \warning The iterator does not own the backing buffer, so the iterator is
@@ -82,7 +83,7 @@ template <typename T> struct Iterator {
    * \warning The type pointed to by the pointer passed to this constructor must
    * match the type parameter used when instantiating the template.
    */
-  Iterator(pointer p) : _ptr(p) {}
+  explicit Iterator(pointer ptr) : _ptr(ptr) {}
 
   /** \brief The indirection operator.
    *
@@ -96,7 +97,7 @@ template <typename T> struct Iterator {
    * iterator that has been incremented to or beyond the end iterator, or
    * decremented beyond the start iterator is UB.
    */
-  reference operator*() const { return *_ptr; }
+  auto operator*() const -> reference { return *_ptr; }
 
   /** \brief The pointer to member of pointer operator.
    *
@@ -112,7 +113,7 @@ template <typename T> struct Iterator {
    * has been incremented or decremented beyond the bounds of the underlying
    * array is UB.
    */
-  pointer operator->() const { return _ptr; }
+  auto operator->() const -> pointer { return _ptr; }
 
   /** \brief The prefix increment operator.
    *
@@ -120,7 +121,7 @@ template <typename T> struct Iterator {
    *
    * \returns itself
    */
-  Iterator &operator++() {
+  auto operator++() -> Iterator& {
     _ptr++;
     return *this;
   }
@@ -132,7 +133,7 @@ template <typename T> struct Iterator {
    *
    * \returns an Iterator pointing to the old position of this iterator.
    */
-  Iterator operator++(int) {
+  auto operator++(int) -> Iterator {
     Iterator tmp = *this;
     _ptr++;
     return tmp;
@@ -143,12 +144,12 @@ template <typename T> struct Iterator {
    * Advances the Iterator by the passed in number of positions and returns
    * itself.
    *
-   * \param i the number of elements to advance the iterator by.
+   * \param offset the number of elements to advance the iterator by.
    *
    * \returns itself
    */
-  Iterator &operator+=(int i) {
-    _ptr += i;
+  auto operator+=(int offset) -> Iterator& {
+    _ptr += offset;
     return *this;
   }
 
@@ -159,7 +160,7 @@ template <typename T> struct Iterator {
    *
    * \returns an Iterator advanced by the passed in number of positions.
    */
-  Iterator operator+(const difference_type other) const { return _ptr + other; }
+  auto operator+(const difference_type other) const -> Iterator { return _ptr + other; }
 
   /** \brief The friend addition operator.
    *
@@ -172,8 +173,8 @@ template <typename T> struct Iterator {
    * \returns an iterator which is the passed in Iterator advanced by the passed
    * in number of positions.
    */
-  friend Iterator operator+(const difference_type value,
-                            const Iterator &other) {
+  friend auto operator+(const difference_type value,
+                        const Iterator&       other) -> Iterator {
     return other + value;
   }
 
@@ -183,7 +184,7 @@ template <typename T> struct Iterator {
    *
    * \returns itself
    */
-  Iterator &operator--() {
+  auto operator--() -> Iterator& {
     _ptr--;
     return *this;
   }
@@ -195,7 +196,7 @@ template <typename T> struct Iterator {
    *
    * \returns an Iterator pointing to the old position of this iterator.
    */
-  Iterator operator--(int) {
+  auto operator--(int) -> Iterator {
     Iterator tmp = *this;
     _ptr--;
     return tmp;
@@ -206,12 +207,12 @@ template <typename T> struct Iterator {
    * Recedes the Iterator by the passed in number of positions, and returns
    * itself.
    *
-   * \param i the number of elements to recede the iterator by.
+   * \param offset the number of elements to recede the iterator by.
    *
    * \returns itself
    */
-  Iterator &operator-=(int i) {
-    _ptr -= i;
+  auto operator-=(int offset) -> Iterator& {
+    _ptr -= offset;
     return *this;
   }
 
@@ -221,7 +222,7 @@ template <typename T> struct Iterator {
    *
    * \returns the distance between the passed Iterator and this one.
    */
-  difference_type operator-(const Iterator &other) const {
+  auto operator-(const Iterator& other) const -> difference_type {
     return _ptr - other._ptr;
   }
 
@@ -234,7 +235,7 @@ template <typename T> struct Iterator {
    * \warning The passed in iterator must point to the same backing buffer or
    * this is UB.
    */
-  Iterator operator-(const difference_type other) const { return _ptr - other; }
+  auto operator-(const difference_type other) const -> Iterator { return _ptr - other; }
 
   /** \brief The friend subtraction operator (iterator and offset).
    *
@@ -245,8 +246,8 @@ template <typename T> struct Iterator {
    * \returns an iterator which is the passed in Iterator receded by the passed
    * in number of positions.
    */
-  friend Iterator operator-(const difference_type value,
-                            const Iterator &other) {
+  friend auto operator-(const difference_type value,
+                        const Iterator&       other) -> Iterator {
     return other - value;
   }
 
@@ -265,9 +266,9 @@ template <typename T> struct Iterator {
    * \warning passing in an offset that would put the iterator beyond the bounds
    * of the underlying array is UB.
    */
-  reference operator[](difference_type idx) const { return _ptr[idx]; }
+  auto operator[](difference_type idx) const -> reference { return _ptr[idx]; }
 
-#if defined(__cplusplus) && (__cplusplus == 202002L)
+#if defined(__cplusplus) && (__cplusplus >= 202002L)
   /** \brief The three-way comparison operator.
    *
    * \param other The iterator to compare this one to.
@@ -277,26 +278,26 @@ template <typename T> struct Iterator {
    * \ref std::strong_ordering::greater if the other iterator is greater than
    * this one.
    */
-  auto operator<=>(const Iterator &other) const = default;
+  auto operator<=>(const Iterator& other) const = default;
 #else
   /** \brief The equality operator.
    */
-  bool operator==(const Iterator &other) const { return other._ptr == _ptr; }
+  bool operator==(const Iterator& other) const { return other._ptr == _ptr; }
   /** \brief The not equal to operator.
    */
-  bool operator!=(const Iterator &other) const { return other._ptr != _ptr; }
+  bool operator!=(const Iterator& other) const { return other._ptr != _ptr; }
   /** \brief The less than or equal to operator.
    */
-  bool operator<=(const Iterator &other) const { return other._ptr <= _ptr; }
+  bool operator<=(const Iterator& other) const { return other._ptr <= _ptr; }
   /** \brief The less than operator.
    */
-  bool operator<(const Iterator &other) const { return other._ptr < _ptr; }
+  bool operator<(const Iterator& other) const { return other._ptr < _ptr; }
   /** \brief The greater than or equal to operator.
    */
-  bool operator>=(const Iterator &other) const { return other._ptr >= _ptr; }
+  bool operator>=(const Iterator& other) const { return other._ptr >= _ptr; }
   /** \brief The greater than operator.
    */
-  bool operator>(const Iterator &other) const { return other._ptr > _ptr; }
+  bool operator>(const Iterator& other) const { return other._ptr > _ptr; }
 #endif
 
 private:

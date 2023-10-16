@@ -1,0 +1,7 @@
+Checks: '*,-fuchsia-*,-llvmlibc-*-namespace,-altera-struct-pack-align,-cppcoreguidelines-pro-bounds-pointer-arithmetic'
+
+CheckOptions:
+  - key:             llvmlibc-restrict-system-libc-headers.Includes
+    value:           -*,string,system_error,vector,iterator,algorithm
+  - key:             portability-restrict-system-includes.Includes
+    value:           -*,string,system_error,vector,iterator,algorithm

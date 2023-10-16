@@ -1,5 +1,5 @@
 CXX                     := clang++
-PRIMARY_SOURCEFILE	:= $(wildcard ../src/*.cpp)
+PRIMARY_SOURCEFILE      := $(wildcard ../src/*.cpp)
 EXECUTABLE_NAME         := lib_unit_tests
 OBJ_DIR			:= obj
 LIB_DIR			:= lib
@@ -9,8 +9,10 @@ LIB_SHORT_NAME          := getargv++
 INCLUDE_DIR		:= include/$(LIB_SHORT_NAME)
 COV_DIR			:= coverage
 PREFIX			:= $(PWD)
-BREW_PREFIX		:= $(shell brew --prefix criterion)
+BREW_PREFIX		:= $(shell /usr/bin/env -P /usr/local/bin:/opt/homebrew/bin brew --prefix)
 CXXFLAGS                := --std=c++20
+# supported: c++11, c++14, c++17, c++20
+# future: c++2b
 LDFLAGS			:=
 DYLIB			:= $(LIB_DIR)/lib$(LIB_SHORT_NAME).dylib
 
@@ -18,14 +20,11 @@ export MallocNanoZone = 0
 SANI_FLAGS := -fno-omit-frame-pointer -fprofile-instr-generate -fsanitize=address -fsanitize=undefined -fsanitize=nullability -fsanitize=unsigned-integer-overflow -fsanitize=local-bounds -fsanitize=nullability -fsanitize=implicit-conversion
 INNER_ASAN_OPTIONS := strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_invalid_pointer_pairs=2:detect_stack_use_after_return=1
 
-.PHONY: integration_tests runner lib_unit_tests pattern benchmark clean libtest1 libtest2 run_lib_unit_tests run_lib_unit_tests_verbose run_lib_unit_tests_debug run_lib_unit_tests_coverage
+.PHONY: integration_tests lib_unit_tests pattern clean libtest1 libtest2 run_lib_unit_tests run_lib_unit_tests_verbose run_lib_unit_tests_debug run_lib_unit_tests_coverage
 
-runner: $(BIN_DIR)/runner
-benchmark: $(BIN_DIR)/benchmark
+.DEFAULT_GOAL := run_lib_unit_tests
+
 lib_unit_tests: $(BIN_DIR)/lib_unit_tests
-
-$(BIN_DIR)/benchmark: EXE := $(BIN_DIR)/benchmark
-$(BIN_DIR)/benchmark: CXXFLAGS += -I ../src/ -fblocks
 
 #unit test library
 $(BIN_DIR)/lib_unit_tests: CPPFLAGS := -MMD -MP -fvisibility=hidden
@@ -87,6 +86,6 @@ $(BIN_DIR) $(OBJ_DIR) $(COV_DIR):
 clean::
 	@$(RM) -rv $(COV_DIR) $(LIB_DIR) $(INCLUDE_DIR) $(BIN_DIR) $(OBJ_DIR) share default.profraw
 
--include $(OBJ:.o=.d)
+-include $($(wildcard $(OBJ_DIR)/*):.o=.d)
 
-.SECONDARY: $(%.o)
+.SECONDARY: $(wildcard $(OBJ_DIR)/*)

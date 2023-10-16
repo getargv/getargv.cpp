@@ -5,9 +5,12 @@
 #include <dispatch/dispatch.h>
 #include <unistd.h>
 
-void exitOnParentExit(void) {
+void exitOnParentExit() {
   dispatch_source_t source = dispatch_source_create(
-                                                    DISPATCH_SOURCE_TYPE_PROC, getppid(), DISPATCH_PROC_EXIT, NULL);
+                                                    DISPATCH_SOURCE_TYPE_PROC,
+                                                    getppid(),
+                                                    DISPATCH_PROC_EXIT,
+                                                    nullptr);
 
   dispatch_source_set_event_handler(source, ^{
     (void)source; // capture so lifetime is long enough
@@ -17,8 +20,8 @@ void exitOnParentExit(void) {
   dispatch_resume(source);
 }
 
-int main() {
-  pid_t pid = getppid();
+auto main() -> int {
+  pid_t const pid = getppid();
 
   exitOnParentExit();
   // signal to parent that child is ready

@@ -1,0 +1,30 @@
+---
+BasedOnStyle: LLVM
+Language: Cpp
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveMacros: true
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortEnumsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
+BinPackArguments: false
+BinPackParameters: false
+BreakStringLiterals: false
+ColumnLimit: 0
+ReflowComments: false
+CommentPragmas: '(pragma|clang)'
+Cpp11BracedListStyle: false
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+KeepEmptyLinesAtTheStartOfBlocks: false
+PointerAlignment: Left
+SpaceBeforeCpp11BracedList: true
+BreakBeforeBinaryOperators: NonAssignment
+AttributeMacros:
+  - inline
+  - noreturn
+  - unused
+---

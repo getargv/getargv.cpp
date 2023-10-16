@@ -1,0 +1,1 @@
+Checks: '*,-fuchsia-*,-llvmlibc-*-namespace,-altera-struct-pack-align,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-llvmlibc-restrict-system-libc-headers,-portability-restrict-system-includes,-cppcoreguidelines-pro-type-cstyle-cast,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-magic-numbers,-hicpp-vararg,-readability-magic-numbers'

@@ -1,55 +1,60 @@
 #include "../include/libgetargv++.hpp"
+#include <algorithm>
 
 namespace Getargv {
 
-ArgvArgc::ArgvArgc(ffi::ArgvArgcResult &&r) : ffi::ArgvArgcResult(r) {
-  r.buffer = nullptr;
-  r.argv = nullptr;
-  r.argc = 0;
-}
-ArgvArgc::~ArgvArgc() { ffi::free_ArgvArgcResult(this); }
+  ArgvArgc::ArgvArgc(ffi::ArgvArgcResult&& ffiResult) : ffi::ArgvArgcResult(ffiResult) {
+    ffiResult.buffer = nullptr;
+    ffiResult.argv   = nullptr;
+    ffiResult.argc   = 0;
+  }
 
-ptrdiff_t ArgvArgc::size() const { return argc; }
-bool ArgvArgc::empty() const { return argc == 0; }
-ArgvArgc::Iterator ArgvArgc::begin() const {
-  return ArgvArgc::Iterator(&this->argv[0]);
-}
-ArgvArgc::Iterator ArgvArgc::end() const {
-  return ArgvArgc::Iterator(&this->argv[argc]);
-}
+  ArgvArgc::~ArgvArgc() { ffi::free_ArgvArgcResult(this); }
 
-char *&ArgvArgc::operator[](const ptrdiff_t index) const {
-  auto count = this->size();
-  if (count > 0) {
-    if (index < 0 && index >= (-1 * count)) {
-      return argv[count + index];
-    } else if (index >= 0 && index < count) {
-      return argv[index];
+  auto ArgvArgc::size() const -> ptrdiff_t { return argc; }
+
+  auto ArgvArgc::empty() const -> bool { return argc == 0; }
+
+  auto ArgvArgc::begin() const -> ArgvArgc::Iterator {
+    return ArgvArgc::Iterator(&this->argv[0]);
+  }
+
+  auto ArgvArgc::end() const -> ArgvArgc::Iterator {
+    return ArgvArgc::Iterator(&this->argv[argc]);
+  }
+
+  auto ArgvArgc::operator[](const ptrdiff_t index) const -> char*& {
+    auto count = this->size();
+    if (count > 0) {
+      if (index < 0 && index >= (-1 * count)) {
+        return argv[count + index];
+      }
+      if (index >= 0 && index < count) {
+        return argv[index];
+      }
+    }
+    throw std::out_of_range("index was out of bounds");
+  }
+
+  auto ArgvArgc::as_array(pid_t pid) noexcept(false) -> ArgvArgc { return ArgvArgc(pid); }
+
+  ArgvArgc::ArgvArgc(pid_t pid) noexcept(false) : ArgvArgcResult() {
+    if (!ffi::get_argv_and_argc_of_pid(pid, this)) {
+      ffi::errno_t const savedErrno = errno;
+      throw std::system_error(savedErrno, std::generic_category());
     }
   }
-  throw std::out_of_range("index was out of bounds");
-}
 
-ArgvArgc ArgvArgc::as_array(pid_t pid) noexcept(false) { return ArgvArgc(pid); }
-
-ArgvArgc::ArgvArgc(pid_t pid) noexcept(false) {
-  if (!ffi::get_argv_and_argc_of_pid(pid, this)) {
-    ffi::errno_t e = errno;
-    throw std::system_error(e, std::generic_category());
+  auto ArgvArgc::to_string_array() const noexcept(false) -> std::vector<std::string> {
+    std::vector<std::string> aresult;
+    aresult.reserve(static_cast<size_t>(this->size()));
+    std::transform(this->begin(), this->end(), back_inserter(aresult), [](char* cStr) -> std::string { return { cStr }; });
+    return aresult;
   }
-}
 
-std::vector<std::string> ArgvArgc::to_string_array() noexcept(false) {
-  std::vector<std::string> aresult;
-  aresult.reserve(static_cast<bool>(this->size()));
-  std::transform(this->begin(), this->end(), back_inserter(aresult),
-                 [](char *c) -> std::string { return std::string(c); });
-  return aresult;
-}
-
-std::vector<std::string> ArgvArgc::as_string_array(pid_t pid) noexcept(false) {
-  ArgvArgc result = ArgvArgc::as_array(pid);
-  return result.to_string_array();
-}
+  auto ArgvArgc::as_string_array(pid_t pid) noexcept(false) -> std::vector<std::string> {
+    const ArgvArgc result = ArgvArgc::as_array(pid);
+    return result.to_string_array();
+  }
 
 } // namespace Getargv

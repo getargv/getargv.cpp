@@ -2,63 +2,77 @@
 
 namespace Getargv {
 
-  Argv::Argv(ffi::ArgvResult &&r) : ffi::ArgvResult(r) {
-    r.buffer = nullptr;
-    r.end_pointer = nullptr;
-    r.end_pointer = nullptr;
+  Argv::Argv(ffi::ArgvResult&& ffiResult) : ffi::ArgvResult(ffiResult) {
+    ffiResult.buffer      = nullptr;
+    ffiResult.end_pointer = nullptr;
+    ffiResult.end_pointer = nullptr;
   }
+
   Argv::~Argv() { ffi::free_ArgvResult(this); }
 
   void Argv::print() {
     if (!ffi::print_argv_of_pid(this->start_pointer, this->end_pointer)) {
-      ffi::errno_t e = errno;
-      throw std::system_error(e, std::generic_category());
+      const ffi::errno_t savedErrno = errno;
+      throw std::system_error(savedErrno, std::generic_category());
     }
   }
-  Argv::Iterator Argv::begin() const {
+
+  auto Argv::begin() const -> Argv::Iterator {
     return Argv::Iterator(this->start_pointer);
   }
-  Argv::Iterator Argv::end() const {
+
+  auto Argv::end() const -> Argv::Iterator {
     return Argv::Iterator(this->end_pointer + 1);
   }
-  ptrdiff_t Argv::size() const {
+
+  auto Argv::size() const -> ptrdiff_t {
     return (empty() ? 0 : end_pointer - start_pointer + 1);
   }
-  bool Argv::empty() const {
+
+  auto Argv::empty() const -> bool {
     return (start_pointer == nullptr || end_pointer == nullptr);
   }
 
-  char &Argv::operator[](const ptrdiff_t index) const {
+  auto Argv::operator[](const ptrdiff_t index) const -> char& {
     auto count = this->size();
     if (count > 0) {
       if (index < 0 && index > (-1 * count)) {
         return end_pointer[index];
-      } else if (index >= 0 && index < count) {
+      }
+      if (index >= 0 && index < count) {
         return start_pointer[index];
       }
     }
     throw std::out_of_range("index was out of bounds");
   }
 
-  Argv::Argv(pid_t pid, unsigned int skip, bool nuls) noexcept(false) {
-    ffi::GetArgvOptions options = {
-      .pid = pid, .nuls = nuls, .skip = static_cast<ffi::uint>(skip)};
+  Argv::Argv(pid_t pid, unsigned int skip, bool nuls) noexcept(false) : ArgvResult() {
+    ffi::GetArgvOptions const options = {
+      #if defined(__cplusplus) && (__cplusplus >= 202002L)
+    .skip = static_cast<ffi::uint>(skip),
+      .pid  = pid,
+      .nuls = nuls,
+      #else
+      static_cast<ffi::uint>(skip),
+      pid,
+      nuls,
+      #endif
+    };
     if (!ffi::get_argv_of_pid(&options, this)) {
-      ffi::errno_t e = errno;
-      throw std::system_error(e, std::generic_category());
+      ffi::errno_t const savedErrno = errno;
+      throw std::system_error(savedErrno, std::generic_category());
     }
   }
 
-  Argv Argv::as_bytes(pid_t pid, unsigned int skip, bool nuls) noexcept(false) {
+  auto Argv::as_bytes(pid_t pid, unsigned int skip, bool nuls) noexcept(false) -> Argv {
     return Argv(pid, skip, nuls);
   }
 
-  std::string Argv::to_string() noexcept(false) {
-    return std::string(this->start_pointer, this->end_pointer);
+  auto Argv::to_string() noexcept(false) -> std::string {
+    return { this->start_pointer, this->end_pointer };
   }
 
-  std::string Argv::as_string(pid_t pid, unsigned int skip,
-                              bool nuls) noexcept(false) {
+  auto Argv::as_string(pid_t pid, unsigned int skip, bool nuls) noexcept(false) -> std::string {
     Argv result(pid, skip, nuls);
 
     return result.to_string();

@@ -1,0 +1,105 @@
+name: C++/make CI
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  check:
+    name: Check code
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v3
+    - name: check
+      run: make lint
+
+  test:
+    name: Test on ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os:
+          - macos-13
+          - macos-12
+          - macos-11
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: test
+    steps:
+    - uses: actions/checkout@v3
+    - name: install deps
+      run: |
+        brew update
+        brew install --force-bottle criterion
+      env:
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
+        HOMEBREW_NO_ENV_HINTS: yes
+        HOMEBREW_NO_ANALYTICS: yes
+    - name: build unit tests
+      run: |
+        make unit_tests
+        make lib_unit_tests
+    - name: build libtests
+      run: |
+        make libtest1
+        make libtest2
+    - name: run tests with coverage
+      if: matrix.os != 'macos-10.15'
+      run: |
+        make run_unit_tests_coverage
+        make run_lib_unit_tests_coverage
+      timeout-minutes: 5
+    - name: run tests without coverage
+      if: matrix.os == 'macos-10.15'
+      run: |
+        make run_unit_tests
+        make run_lib_unit_tests
+      timeout-minutes: 5
+
+  build:
+    name: Build on ${{ matrix.os }}
+    timeout-minutes: 5
+    needs: [ check, test ]
+    strategy:
+      matrix:
+        os:
+          - macos-13
+          - macos-12
+          - macos-11
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: make exe
+      run: make CPU_FLAGS="" MACOS_VER_MINOR=0 release
+    - name: make CPU_FLAGS="" MACOS_VER_MINOR=0 library
+      run: make dylib
+    - name: make installer
+      run: make dmg
+    - name: rename dmg
+      run: mv pkg/*.dmg pkg/getargv-${{ matrix.os }}.dmg
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.os }}.zip
+        path: |
+          pkg/*.pkg
+          pkg/*.dmg
+
+  release:
+    if: ${{ github.ref_type == 'tag' }}
+    needs: [ build ]
+    timeout-minutes: 5
+    runs-on: macos-latest
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        path: pkg
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: pkg/*.zip/*.dmg
+        name: ${{ github.ref_name }}

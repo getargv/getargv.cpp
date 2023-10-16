@@ -1,0 +1,19 @@
+CompileFlags:
+  Add:
+    - '-I'
+    - /usr/local/include
+
+---
+If:
+  PathMatch: test/src/.*
+
+CompileFlags:
+  CompilationDatabase: "test"
+
+Diagnostics:
+  ClangTidy:
+    Remove:
+    - cppcoreguidelines-pro-bounds-pointer-arithmetic
+    - llvmlibc-*-namespace
+    - altera-struct-pack-align
+    - fuchsia-*

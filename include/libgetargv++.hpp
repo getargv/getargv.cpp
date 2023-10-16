@@ -1,19 +1,23 @@
 #ifndef LIBGETARGVPLUSPLUS_H
 #define LIBGETARGVPLUSPLUS_H
 
+#if defined(__cplusplus) && (__cplusplus >= 201700L)
+#define NODISCARD [[nodiscard]]
+#else
+#define NODISCARD
+#endif
+
 #include "iter.hpp"
 #include <string>
 #include <system_error>
 #include <vector>
-
-// TODO: tests
 
 /** \brief This namespace isolates the library from your code.
  */
 namespace Getargv {
   namespace ffi {
 #include <libgetargv.h>
-  }
+  } // namespace ffi
 
   /** \brief This struct provides an iterable and printable representation of
    * the arguments of the passed in pid, formatted as specified.
@@ -65,8 +69,7 @@ namespace Getargv {
      * \sa as_string()
      * \sa Argv(pid,skip,nuls)
      */
-    static Argv as_bytes(pid_t pid, unsigned int skip = 0,
-                         bool nuls = false) noexcept(false);
+    static auto as_bytes(pid_t pid, unsigned int skip = 0, bool nuls = false) noexcept(false) -> Argv;
 
     /** \brief This function constructs an Argv but then converts the result into
      * a \ref std::string.
@@ -95,8 +98,7 @@ namespace Getargv {
      *
      * \sa as_bytes()
      */
-    static std::string as_string(pid_t pid, unsigned int skip = 0,
-                                 bool nuls = false) noexcept(false);
+    static auto as_string(pid_t pid, unsigned int skip = 0, bool nuls = false) noexcept(false) -> std::string;
 
     /** \brief This function converts an Argv into a \ref std::string.
      *
@@ -112,7 +114,7 @@ namespace Getargv {
      *
      * \sa as_string()
      */
-    std::string to_string() noexcept(false);
+    auto to_string() noexcept(false) -> std::string;
 
     /**
      * Due to being backed by a buffer allocated by the C lib, this struct cannot
@@ -131,7 +133,7 @@ namespace Getargv {
      * from C or C++ could change the layout of the struct, making the C function
      * that frees the buffer not work.
      */
-    Argv(Argv &r) = delete;
+    Argv(Argv& other) = delete;
 
     /** \brief This is a constructor for the Argv struct representing the args of
      * pid, formatted as specified.
@@ -151,18 +153,18 @@ namespace Getargv {
      *
      * \sa as_bytes
      */
-    Argv(pid_t pid, unsigned int skip = 0, bool nuls = false) noexcept(false);
+    explicit Argv(pid_t pid, unsigned int skip = 0, bool nuls = false) noexcept(false);
 
-    Argv(Argv &&r) = default; ///< Default move constructor
+    Argv(Argv&& other) = default; ///< Default move constructor
 
     /** \brief Constructor to convert C struct into C++ struct
      *
-     * \param r the ffi::ArgvResult to convert into an Argv.
+     * \param ffiResult the ffi::ArgvResult to convert into an Argv.
      *
      * \warning Do not free the C struct's buffer after calling this constructor,
      * it is adopted by this struct, and freed when this struct is destructed.
      */
-    Argv(ffi::ArgvResult &&r);
+    explicit Argv(ffi::ArgvResult&& ffiResult);
 
     /** \brief This is the destructor for this struct.
      *
@@ -179,14 +181,14 @@ namespace Getargv {
      *
      * \returns the byte (char) at the passed offset.
      */
-    char &operator[](const ptrdiff_t index) const;
+    auto operator[](ptrdiff_t index) const -> char&;
 
     /** \brief returns the number of bytes in the arguments this struct
      * represents.
      *
      * \returns the number of bytes in the arguments this struct represents.
      */
-    ptrdiff_t size() const;
+    NODISCARD auto size() const -> ptrdiff_t;
 
     /** \brief returns true if the process whose arguments this struct
      * represents either had no arguments or they were all skipped.
@@ -194,7 +196,7 @@ namespace Getargv {
      * \returns true if the process whose arguments this struct represents either
      * had no arguments or they were all skipped.
      */
-    bool empty() const;
+    NODISCARD auto empty() const -> bool;
 
     /** \brief returns a begin iterator.
      *
@@ -203,7 +205,7 @@ namespace Getargv {
      *
      * \sa Iterator
      */
-    Iterator begin() const;
+    NODISCARD auto begin() const -> Iterator;
 
     /** \brief returns an end iterator.
      *
@@ -212,7 +214,7 @@ namespace Getargv {
      *
      * \sa Iterator
      */
-    Iterator end() const;
+    NODISCARD auto end() const -> Iterator;
 
     /** \brief Prints the bytes of the arguments this struct represents to stdout.
      *
@@ -254,7 +256,7 @@ namespace Getargv {
      * over the C strings (char*) representating the arguments this struct
      * represents.
      */
-    using Iterator = Iterator<char *>;
+    using Iterator = Iterator<char*>;
 
     /** \brief This function creates an ArgvArgc struct for the args of pid.
      *
@@ -272,7 +274,7 @@ namespace Getargv {
      * \sa as_array()
      * \sa ArgvArgc(pid)
      */
-    static ArgvArgc as_array(pid_t pid) noexcept(false);
+    static auto as_array(pid_t pid) noexcept(false) -> ArgvArgc;
 
     /** \brief This function constructs an ArgvArgc but then converts the result
      * into a \ref std::vector<std::string>.
@@ -294,7 +296,7 @@ namespace Getargv {
      *
      * \sa as_array()
      */
-    static std::vector<std::string> as_string_array(pid_t pid) noexcept(false);
+    static auto as_string_array(pid_t pid) noexcept(false) -> std::vector<std::string>;
 
     /** \brief This function converts an ArgvArgc into a \ref
      * std::vector<std::string>.
@@ -310,7 +312,7 @@ namespace Getargv {
      *
      * \sa as_string_array()
      */
-    std::vector<std::string> to_string_array() noexcept(false);
+    NODISCARD auto to_string_array() const noexcept(false) -> std::vector<std::string>;
 
     /**
      * Due to being backed by buffers allocated by the C lib, this struct cannot
@@ -329,7 +331,7 @@ namespace Getargv {
      * allocated from C or C++ could change the layout of the struct, making the C
      * function that frees the buffers not work.
      */
-    ArgvArgc(ArgvArgc &r) = delete;
+    ArgvArgc(ArgvArgc& other) = delete;
 
     /** \brief This is a constructor for the ArgvArgc struct representing the args
      * of pid.
@@ -344,18 +346,18 @@ namespace Getargv {
      *
      * \sa as_array
      */
-    ArgvArgc(pid_t pid) noexcept(false);
+    explicit ArgvArgc(pid_t pid) noexcept(false);
 
-    ArgvArgc(ArgvArgc &&r) = default; ///< Default move constructor
+    ArgvArgc(ArgvArgc&& other) = default; ///< Default move constructor
 
     /** \brief Constructor to convert C struct into C++ struct
      *
-     * \param r the ffi::ArgvArgcResult from which to make an ArgvArgc.
+     * \param ffiResult the ffi::ArgvArgcResult from which to make an ArgvArgc.
      *
      * \warning Do not free the C struct's buffers after calling this constructor,
      * they are adopted by this struct, and freed when this struct is destructed.
      */
-    ArgvArgc(ffi::ArgvArgcResult &&r);
+    explicit ArgvArgc(ffi::ArgvArgcResult&& ffiResult);
 
     /** \brief This is the destructor for this struct.
      *
@@ -377,19 +379,19 @@ namespace Getargv {
      * and when passed to functions, so there's no need to return a
      * \ref std::string here.
      */
-    char *&operator[](const ptrdiff_t index) const;
+    auto operator[](ptrdiff_t index) const -> char*&;
 
     /** \brief returns the number of arguments this struct represents
      *
      * \returns the number of arguments this struct represents
      */
-    ptrdiff_t size() const;
+    NODISCARD auto size() const -> ptrdiff_t;
 
     /** \brief returns true if the targetted process had no arguments
      *
      * \returns true if the targetted process had no arguments
      */
-    bool empty() const;
+    NODISCARD auto empty() const -> bool;
 
     /** \brief returns a begin iterator.
      *
@@ -398,7 +400,7 @@ namespace Getargv {
      *
      * \sa Iterator
      */
-    Iterator begin() const;
+    NODISCARD auto begin() const -> Iterator;
 
     /** \brief returns an end iterator.
      *
@@ -407,7 +409,7 @@ namespace Getargv {
      *
      * \sa Iterator
      */
-    Iterator end() const;
+    NODISCARD auto end() const -> Iterator;
   };
 
 } // namespace Getargv
