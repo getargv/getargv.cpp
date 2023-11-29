@@ -86,6 +86,7 @@ $(BIN_DIR)/%: $(OBJ_DIR)/%.o | $(BIN_DIR)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	echo $(COMPILER_VERSION) $(COMPILER_VERSION_NUMBER) $(CLANG_13_OR_MORE)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 $(BIN_DIR) $(OBJ_DIR) $(COV_DIR):
