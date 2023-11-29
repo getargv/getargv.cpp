@@ -26,10 +26,9 @@ ReportHook(POST_ALL)(struct criterion_global_stats* stats) {
   (void)fprintf(stderr, "To rerun failed tests: `CRITERION_TEST_PATTERN='*(");
   size_t                        failedTestIndex = 0;
   struct criterion_suite_stats* suite           = stats->suites;
-  const size_t                  nb_tests        = suite->nb_tests;
   for (size_t suiteIndex = 0; suiteIndex < stats->nb_suites; suiteIndex++) {
     struct criterion_test_stats* test = suite->tests;
-    for (size_t testIndex = 0; testIndex < nb_tests; testIndex++) {
+    for (size_t testIndex = 0; testIndex < suite->nb_tests; testIndex++) {
       if (test->test_status == CR_STATUS_FAILED) {
         (void)fprintf(stderr, "%s%s", test->test->data->identifier_, (failedTestIndex++ < stats->tests_failed - 1) ? "|" : "");
       }
