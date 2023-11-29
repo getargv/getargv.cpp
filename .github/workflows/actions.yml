@@ -22,18 +22,19 @@ jobs:
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
     - uses: actions/checkout@v4
-    - uses: actions/checkout@v4
       with:
         repository: getargv/getargv
-        path: getargv/
+        path: getargv
         token: ${{ secrets.GH_PAT }}
-        sparse-checkout: |
-          include/libgetargv.h
-        sparse-checkout-cone-mode: false
-    - run: mv include/libgetargv.h /usr/local/include/libgetargv.h
+    - name: Build libgetargv
+      run: make install_dylib
       working-directory: getargv
+    - uses: actions/checkout@v4
+      with:
+        path: getargv.cpp
     - name: check
       run: "make LIBVER=$(sw_vers -ProductVersion) lint"
+      working-directory: getargv.cpp
 
   test:
     name: Test on ${{ matrix.os }}
