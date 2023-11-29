@@ -1,4 +1,4 @@
-LIBVER=$(shell vtool -show-build $(shell brew --prefix)/lib/libgetargv.dylib | awk '/minos/{print $$2}')
+LIBVER ?=$(shell vtool -show-build $(shell brew --prefix)/lib/libgetargv.dylib | awk '/minos/{print $$2}')
 export MACOSX_DEPLOYMENT_TARGET=$(LIBVER)
 VERSION=0.1
 COMPAT_VERSION := $(shell echo $(VERSION) | cut -f1 -d.).0

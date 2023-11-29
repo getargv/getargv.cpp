@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: check
-      run: make lint
+      run: "make LIBVER=$(sw_vers -ProductVersion) lint"
 
   test:
     name: Test on ${{ matrix.os }}
