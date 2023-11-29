@@ -14,9 +14,18 @@ LIB_DIR = lib
 PREFIX := /usr/local
 CXX=clang++
 CPPFLAGS += -MMD -MP
-CXXFLAGS := --std=c++20 -O3 -Iinclude
+
+COMPILER_VERSION		:= $(shell $(CXX) --version | grep version | grep -o -m 1 "[0-9]\+\.[0-9]\+\.*[0-9]*" | head -n 1)
+COMPILER_VERSION_NUMBER		:= $(shell echo $(COMPILER_VERSION) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$$/&00/')
+CLANG_13_OR_MORE		:= $(shell expr $(COMPILER_VERSION_NUMBER) \>= 130000)
+ifneq ($(CLANG_13_OR_MORE),0)
 # supported: c++11, c++14, c++17, c++20
 # future: c++2b
+CXXFLAGS := --std=c++20 -O3 -Iinclude
+else
+CXXFLAGS := --std=c++17 -O3 -Iinclude
+endif
+
 EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
 LDFLAGS += -Llib -fvisibility=default -fPIC
 LDLIBS += -lgetargv
