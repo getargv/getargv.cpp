@@ -16,7 +16,7 @@ jobs:
     - name: install deps
       run: |
         brew update
-        brew install --force-bottle bear
+        brew install --force-bottle bear llvm
       env:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
         HOMEBREW_NO_ENV_HINTS: yes

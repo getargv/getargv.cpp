@@ -69,6 +69,6 @@ clean:
 
 lint: compile_commands.json
 	for file in $(SOURCES); do /usr/bin/xcrun -r clangd --enable-config --clang-tidy --log=error --check=$$file; done
-	$(shell brew --prefix llvm)/bin/scan-build -enable-checker security -enable-checker unix -enable-checker valist $(MAKE) -B dylib || ls $(shell brew --prefix llvm)/bin
+	$(shell brew --prefix llvm)/bin/scan-build -enable-checker security -enable-checker unix -enable-checker valist $(MAKE) -B dylib
 
 -include $(OBJECTS:.o=.d)
