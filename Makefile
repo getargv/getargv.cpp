@@ -62,7 +62,7 @@ docs:
 db: compile_commands.json
 
 compile_commands.json: Makefile
-	bear -- make -B dylib
+	bear -- make -B $(OBJECTS)
 
 clean:
 	@$(RM) -rf $(OBJ_DIR) $(LIB_DIR) docs

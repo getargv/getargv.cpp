@@ -21,7 +21,16 @@ jobs:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        repository: getargv/getargv
+        path: getargv/
+        token: ${{ secrets.GH_PAT }}
+        sparse-checkout: |
+          getargv/include/libgetargv.h
+        sparse-checkout-cone-mode: false
+    - run: mv getargv/include/libgetargv.h /usr/local/include/libgetargv.h
     - name: check
       run: "make LIBVER=$(sw_vers -ProductVersion) lint"
 
@@ -34,9 +43,9 @@ jobs:
           - macos-13
           - macos-12
           - macos-11
-    runs-on: ${{ matrix.os }}c
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: getargv/getargv
         path: getargv
@@ -44,7 +53,7 @@ jobs:
     - name: Build libgetargv
       run: make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         path: getargv.cpp
     - name: install deps
@@ -86,7 +95,7 @@ jobs:
           - macos-11
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: make exe
       run: make CPU_FLAGS="" MACOS_VER_MINOR=0 release
     - name: make CPU_FLAGS="" MACOS_VER_MINOR=0 library
