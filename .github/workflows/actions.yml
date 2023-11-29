@@ -13,6 +13,14 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 5
     steps:
+    - name: install deps
+      run: |
+        brew update
+        brew install --force-bottle bear
+      env:
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
+        HOMEBREW_NO_ENV_HINTS: yes
+        HOMEBREW_NO_ANALYTICS: yes
     - uses: actions/checkout@v3
     - name: check
       run: "make LIBVER=$(sw_vers -ProductVersion) lint"
@@ -26,10 +34,7 @@ jobs:
           - macos-13
           - macos-12
           - macos-11
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: test
+    runs-on: ${{ matrix.os }}c
     steps:
     - uses: actions/checkout@v3
       with:
@@ -52,22 +57,22 @@ jobs:
         HOMEBREW_NO_ANALYTICS: yes
     - name: build unit tests
       run: make lib_unit_tests
-      working-directory: getargv.cpp
+      working-directory: getargv.cpp/test
     - name: build libtests
       run: |
         make libtest1
         make libtest2
-      working-directory: getargv.cpp
+      working-directory: getargv.cpp/test
     - name: run tests with coverage
       if: matrix.os != 'macos-10.15'
       run: make run_lib_unit_tests_coverage
       timeout-minutes: 5
-      working-directory: getargv.cpp
+      working-directory: getargv.cpp/test
     - name: run tests without coverage
       if: matrix.os == 'macos-10.15'
       run: make run_lib_unit_tests
       timeout-minutes: 5
-      working-directory: getargv.cpp
+      working-directory: getargv.cpp/test
 
   build:
     name: Build on ${{ matrix.os }}
