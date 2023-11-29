@@ -13,7 +13,7 @@ BREW_PREFIX		:= $(shell /usr/bin/env -P /usr/local/bin:/opt/homebrew/bin brew --
 
 COMPILER_VERSION		:= $(shell $(CXX) --version | grep version | grep -o -m 1 "[0-9]\+\.[0-9]\+\.*[0-9]*" | head -n 1)
 COMPILER_VERSION_NUMBER		:= $(shell echo $(COMPILER_VERSION) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$$/&00/')
-CLANG_13_OR_MORE		:= $(shell expr $(COMPILER_VERSION_NUMBER) \>= 130000)
+CLANG_13_OR_MORE		:= $(shell expr $(COMPILER_VERSION_NUMBER) \>= 130106)
 ifneq ($(CLANG_13_OR_MORE),0)
 CXXFLAGS                := --std=c++20
 # supported: c++11, c++14, c++17, c++20
