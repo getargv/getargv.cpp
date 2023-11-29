@@ -60,16 +60,15 @@ run_lib_unit_tests_coverage: $(COV_DIR)/lib_unit_tests.profdata
 
 $(COV_DIR)/%.profdata: EXECUTABLE_NAME = $(basename $(notdir $@))
 $(COV_DIR)/%.profdata: export ASAN_OPTIONS = $(INNER_ASAN_OPTIONS)
-$(COV_DIR)/%.profdata: export LLVM_PROFILE_FILE = $(COV_DIR)/%c$(EXECUTABLE_NAME)-%p.profraw
 $(COV_DIR)/%.profdata: $(BIN_DIR)/% | $(COV_DIR) $(BIN_DIR)/child
-	$< -j0
-	/usr/bin/xcrun -r llvm-profdata merge --profiled-binary=$< $(COV_DIR)/$(EXECUTABLE_NAME)-*.profraw -o $@
+	LLVM_PROFILE_FILE="$(COV_DIR)/%c$(EXECUTABLE_NAME)-%p.profraw" $< -j0
+	/usr/bin/xcrun -r llvm-profdata merge -sparse $(COV_DIR)/$(EXECUTABLE_NAME)-*.profraw -o $@
 	@$(RM) $(COV_DIR)/$(EXECUTABLE_NAME)-*.profraw
-	/usr/bin/xcrun -r llvm-cov report --summary-only --instr-profile=$@ --ignore-filename-regex='(unit_test|criterion)' $< $(PRIMARY_SOURCEFILE)
+	/usr/bin/xcrun -r llvm-cov report --summary-only --instr-profile=$@ --ignore-filename-regex='(unit_test|criterion|.h)' $< $(PRIMARY_SOURCEFILE)
 
 %_coverage_report: $(COV_DIR)/%.profdata | $(BIN_DIR)/%
-	/usr/bin/xcrun -r llvm-cov show --instr-profile=$< --show-expansions --show-branches=count --show-line-counts-or-regions $| $(PRIMARY_SOURCEFILE)
-	/usr/bin/xcrun -r llvm-cov report --summary-only --instr-profile=$< --ignore-filename-regex='(unit_test|criterion)' $| $(PRIMARY_SOURCEFILE)
+	/usr/bin/xcrun -r llvm-cov show --instr-profile=$< --show-expansions --show-branches=count --show-line-counts-or-regions --ignore-filename-regex='(unit_test|criterion|.h)' $|
+	/usr/bin/xcrun -r llvm-cov report --summary-only --instr-profile=$< --ignore-filename-regex='(unit_test|criterion|.h)' $| $(PRIMARY_SOURCEFILE)
 
 $(LIB_DIR)/%.dylib:
 	$(MAKE) -C .. PREFIX=$(PREFIX) dylib install_dylib
