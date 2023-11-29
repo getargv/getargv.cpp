@@ -32,6 +32,16 @@ jobs:
         working-directory: test
     steps:
     - uses: actions/checkout@v3
+      with:
+        repository: getargv/getargv
+        path: getargv
+        token: ${{ secrets.GH_PAT }}
+    - name: Build libgetargv
+      run: make install_dylib
+      working-directory: getargv
+    - uses: actions/checkout@v3
+      with:
+        path: getargv.cpp
     - name: install deps
       run: |
         brew update
@@ -42,22 +52,22 @@ jobs:
         HOMEBREW_NO_ANALYTICS: yes
     - name: build unit tests
       run: make lib_unit_tests
+      working-directory: getargv.cpp
     - name: build libtests
       run: |
         make libtest1
         make libtest2
+      working-directory: getargv.cpp
     - name: run tests with coverage
       if: matrix.os != 'macos-10.15'
-      run: |
-        make run_unit_tests_coverage
-        make run_lib_unit_tests_coverage
+      run: make run_lib_unit_tests_coverage
       timeout-minutes: 5
+      working-directory: getargv.cpp
     - name: run tests without coverage
       if: matrix.os == 'macos-10.15'
-      run: |
-        make run_unit_tests
-        make run_lib_unit_tests
+      run: make run_lib_unit_tests
       timeout-minutes: 5
+      working-directory: getargv.cpp
 
   build:
     name: Build on ${{ matrix.os }}
