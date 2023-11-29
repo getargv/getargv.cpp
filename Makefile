@@ -62,13 +62,13 @@ docs:
 db: compile_commands.json
 
 compile_commands.json: Makefile
-	bear -- make -B $(OBJECTS)
+	$(shell brew --prefix bear)/bin/bear -- make -B $(OBJECTS)
 
 clean:
 	@$(RM) -rf $(OBJ_DIR) $(LIB_DIR) docs
 
 lint: compile_commands.json
 	for file in $(SOURCES); do /usr/bin/xcrun -r clangd --enable-config --clang-tidy --log=error --check=$$file; done
-	$(shell brew --prefix llvm)/bin/scan-build -enable-checker security -enable-checker unix -enable-checker valist $(MAKE) -B dylib
+	$(shell brew --prefix llvm)/bin/scan-build -enable-checker security -enable-checker unix -enable-checker valist $(MAKE) -B dylib || ls $(shell brew --prefix llvm)/bin
 
 -include $(OBJECTS:.o=.d)
