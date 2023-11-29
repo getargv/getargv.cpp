@@ -67,4 +67,8 @@ compile_commands.json: Makefile
 clean:
 	@$(RM) -rf $(OBJ_DIR) $(LIB_DIR) docs
 
+lint: compile_commands.json
+	/usr/bin/xcrun -r clangd --enable-config --clang-tidy --log=error $(SOURCES:%=--check=%)
+	( brew list -q --formula llvm &>/dev/null && $(shell brew --prefix llvm)/bin/scan-build -enable-checker security -enable-checker unix -enable-checker valist $(MAKE) -B dylib ) || true
+
 -include $(OBJECTS:.o=.d)
