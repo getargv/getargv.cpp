@@ -2,6 +2,9 @@
 #define LIBGETARGVPLUSPLUS_ITERATOR_H
 
 #include <iterator>
+#if defined(__cplusplus) && (__cplusplus >= 202002L)
+#include <compare>
+#endif
 namespace Getargv {
 
   /** \brief A template that turns a pointer to a C style array into a C++
