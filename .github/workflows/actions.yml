@@ -41,9 +41,7 @@ jobs:
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
     - name: build unit tests
-      run: |
-        make unit_tests
-        make lib_unit_tests
+      run: make lib_unit_tests
     - name: build libtests
       run: |
         make libtest1
