@@ -36,7 +36,7 @@ DYLIB = lib/$(DYLIB_FILENAME)
 SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-.PHONY := db clean dylib install_dylib
+.PHONY := db clean dylib install_dylib lint
 .DEFAULT_GOAL := dylib
 
 dylib: $(DYLIB)
