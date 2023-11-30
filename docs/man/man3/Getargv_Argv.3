@@ -1,0 +1,387 @@
+.TH "Getargv::Argv" 3 "Version 0.1" "libgetargv++" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Getargv::Argv \- This struct provides an iterable and printable representation of the arguments of the passed in pid, formatted as specified\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <libgetargv++\&.hpp>\fP
+.PP
+Inherits ffi::ArgvResult\&.
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "using \fBIterator\fP = \fBIterator\fP< char >"
+.br
+.RI "The type of iterator provided by \fBbegin()\fP and \fBend()\fP "
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "auto \fBto_string\fP () noexcept(false) \-> \fBstd::string\fP"
+.br
+.RI "This function converts an \fBArgv\fP into a \fBstd::string\fP\&. "
+.ti -1c
+.RI "\fBArgv\fP (\fBArgv\fP &other)=delete"
+.br
+.ti -1c
+.RI "\fBArgv\fP (pid_t pid, unsigned int skip=0, bool nuls=false) noexcept(false)"
+.br
+.RI "This is a constructor for the \fBArgv\fP struct representing the args of pid, formatted as specified\&. "
+.ti -1c
+.RI "\fBArgv\fP (\fBArgv\fP &&other)=default"
+.br
+.RI "Default move constructor\&. "
+.ti -1c
+.RI "\fBArgv\fP (ffi::ArgvResult &&ffiResult)"
+.br
+.RI "Constructor to convert C struct into C++ struct\&. "
+.ti -1c
+.RI "\fB~Argv\fP ()"
+.br
+.RI "This is the destructor for this struct\&. "
+.ti -1c
+.RI "auto \fBoperator[]\fP (ptrdiff_t index) const \-> char &"
+.br
+.RI "index operator to access a byte (char) at supplied offset (0 indexed) "
+.ti -1c
+.RI "NODISCARD auto \fBsize\fP () const \-> ptrdiff_t"
+.br
+.RI "returns the number of bytes in the arguments this struct represents\&. "
+.ti -1c
+.RI "NODISCARD auto \fBempty\fP () const \-> bool"
+.br
+.RI "returns true if the process whose arguments this struct represents either had no arguments or they were all skipped\&. "
+.ti -1c
+.RI "NODISCARD auto \fBbegin\fP () const \-> \fBIterator\fP"
+.br
+.RI "returns a begin iterator\&. "
+.ti -1c
+.RI "NODISCARD auto \fBend\fP () const \-> \fBIterator\fP"
+.br
+.RI "returns an end iterator\&. "
+.ti -1c
+.RI "void \fBprint\fP ()"
+.br
+.RI "Prints the bytes of the arguments this struct represents to stdout\&. "
+.in -1c
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static auto \fBas_bytes\fP (pid_t pid, unsigned int skip=0, bool nuls=false) noexcept(false) \-> \fBArgv\fP"
+.br
+.RI "This function creates an \fBArgv\fP struct for the args of pid, formatted as specified\&. "
+.ti -1c
+.RI "static auto \fBas_string\fP (pid_t pid, unsigned int skip=0, bool nuls=false) noexcept(false) \-> \fBstd::string\fP"
+.br
+.RI "This function constructs an \fBArgv\fP but then converts the result into a \fBstd::string\fP\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+This struct provides an iterable and printable representation of the arguments of the passed in pid, formatted as specified\&. 
+
+
+.PP
+\fBAuthor\fP
+.RS 4
+Camden Narzt
+.RE
+.PP
+This struct is a C++ implementation of the ArgvResult struct from the C libgetargv\&. You create this struct with the \fBas_bytes()\fP function\&. This struct adds the following functionality to the C struct: 
+.PD 0
+.IP "\(bu" 1
+It provides an iterator over the bytes of the arguments\&. 
+.IP "\(bu" 1
+You can call print on the struct directly\&. 
+.IP "\(bu" 1
+It reports its size, and if it is empty\&. 
+.IP "\(bu" 1
+It cleans up the backing buffer automatically using the correct free function\&.
+.PP
+This struct is well suited to byte level operations, for argument level operations the \fBArgvArgc\fP struct is a better fit, as it is indexed by argument\&.
+.PP
+\fBRemarks\fP
+.RS 4
+Due to being backed by a buffer allocated by the C lib, this struct cannot be copied, only moved\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB41\fP of file \fBlibgetargv++\&.hpp\fP\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "using \fBGetargv::Argv::Iterator\fP =  \fBIterator\fP<char>"
+
+.PP
+The type of iterator provided by \fBbegin()\fP and \fBend()\fP This iterator is a \fBstd::contiguous_iterator_tag\fP (since C++ 20) or a \fBstd::random_access_iterator_tag\fP (prior to C++ 20)\&. This is an iterator over the bytes (char) of the arguments this struct represents\&. 
+.PP
+Definition at line \fB48\fP of file \fBlibgetargv++\&.hpp\fP\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Getargv::Argv::Argv (\fBArgv\fP & other)\fC [delete]\fP"
+Due to being backed by a buffer allocated by the C lib, this struct cannot be copied, only moved\&.
+.PP
+Rationale for non-copyability: 
+.PD 0
+.IP "\(bu" 1
+memory blocks returned from calls to malloc must be released by calls to free from the same allocator\&. 
+.IP "\(bu" 1
+this struct must clean up its backing buffer using the provided C-lib function to release the memory to ensure the correct free() is called\&. 
+.IP "\(bu" 1
+if a shallow copy were made of this struct, the buffer would be released by each copy of the struct which is not allowed\&. 
+.IP "\(bu" 1
+if a new backing buffer were allocated from C++, the call to the C free() function may not match\&. 
+.IP "\(bu" 1
+adding additional member variables to track if the buffer was allocated from C or C++ could change the layout of the struct, making the C function that frees the buffer not work\&. 
+.PP
+
+.SS "Getargv::Argv::Argv (pid_t pid, unsigned int skip = \fC0\fP, bool nuls = \fCfalse\fP)\fC [explicit]\fP"
+
+.PP
+This is a constructor for the \fBArgv\fP struct representing the args of pid, formatted as specified\&. This constructor wraps the C api for creating an ffi::ArgvResult and handles failure by throwing an exception\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIpid\fP the pid of the process whose arguments are requested\&.
+.br
+\fIskip\fP the number of leading arguemnts to skip over\&.
+.br
+\fInuls\fP whether to replace delimiting ␀ bytes with spaces for human consumption\&.
+.RE
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If the underlying sysctl fails, an exception is thrown containing the errno\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_bytes\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB49\fP of file \fBargv\&.cpp\fP\&.
+.SS "Getargv::Argv::Argv (ffi::ArgvResult && ffiResult)\fC [explicit]\fP"
+
+.PP
+Constructor to convert C struct into C++ struct\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIffiResult\fP the ffi::ArgvResult to convert into an \fBArgv\fP\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Do not free the C struct's buffer after calling this constructor, it is adopted by this struct, and freed when this struct is destructed\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB5\fP of file \fBargv\&.cpp\fP\&.
+.SS "Getargv::Argv::~Argv ()"
+
+.PP
+This is the destructor for this struct\&. This destructor calls the C api to clean up the backing buffer using the correct free() function\&. Due to the need for malloc/free to match, this destructor is not safe for buffers allocated from C++\&. 
+.PP
+Definition at line \fB11\fP of file \fBargv\&.cpp\fP\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "auto Getargv::Argv::as_bytes (pid_t pid, unsigned int skip = \fC0\fP, bool nuls = \fCfalse\fP) \-> \fBArgv\fP\fC [static]\fP"
+
+.PP
+This function creates an \fBArgv\fP struct for the args of pid, formatted as specified\&. This function is an alias for the constructor with the same arguments\&. It exists to provide a counterpart to the \fBas_string()\fP function\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIpid\fP the pid of the process whose arguments are requested\&.
+.br
+\fIskip\fP the number of leading arguemnts to skip over\&.
+.br
+\fInuls\fP whether to replace delimiting ␀ bytes with spaces for human consumption\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The \fBArgv\fP struct representing the arguments of the targetted pid, formatted as requested\&.
+.RE
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If the underlying sysctl fails, an exception is thrown containing the errno\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_string()\fP 
+.PP
+Argv(pid,skip,nuls) 
+.RE
+.PP
+
+.PP
+Definition at line \fB67\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::as_string (pid_t pid, unsigned int skip = \fC0\fP, bool nuls = \fCfalse\fP) \-> \fBstd::string\fP\fC [static]\fP"
+
+.PP
+This function constructs an \fBArgv\fP but then converts the result into a \fBstd::string\fP\&. This function creates a \fBstd::string\fP representing the args of pid, formatted as specified\&. It calls the Argv(pid, skip, nuls) constructor, and takes the same arguments and raises the same exceptions\&.
+.PP
+\fBAttention\fP
+.RS 4
+Note that the arguments of a process on macOS are not guaranteed to be in any encoding, and therefore should be treated with caution\&. Particularly, unless nuls is set to true, there can be internal ␀ bytes in the returned string\&.
+.RE
+.PP
+\fBParameters\fP
+.RS 4
+\fIpid\fP the pid of the process whose arguments are requested\&.
+.br
+\fIskip\fP the number of leading arguemnts to skip over\&.
+.br
+\fInuls\fP whether to replace delimiting ␀ bytes with spaces for human consumption\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+A \fBstd::string\fP representing the arguments of the targetted pid, formatted as requested\&.
+.RE
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If the underlying sysctl fails, an exception is thrown containing the errno\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_bytes()\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB75\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::begin () const \-> \fBIterator\fP"
+
+.PP
+returns a begin iterator\&. 
+.PP
+\fBReturns\fP
+.RS 4
+an \fBIterator\fP pointing to the beginning of the bytes of the arguments this struct represents\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBIterator\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB20\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::empty () const \-> bool"
+
+.PP
+returns true if the process whose arguments this struct represents either had no arguments or they were all skipped\&. 
+.PP
+\fBReturns\fP
+.RS 4
+true if the process whose arguments this struct represents either had no arguments or they were all skipped\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB32\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::end () const \-> \fBIterator\fP"
+
+.PP
+returns an end iterator\&. 
+.PP
+\fBReturns\fP
+.RS 4
+an \fBIterator\fP pointing to just after the end of the arguments this struct represents\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBIterator\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB24\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::operator[] (ptrdiff_t index) const \-> char&"
+
+.PP
+index operator to access a byte (char) at supplied offset (0 indexed) 
+.PP
+\fBParameters\fP
+.RS 4
+\fIindex\fP the offset into the byte array of the requested byte\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+the byte (char) at the passed offset\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB36\fP of file \fBargv\&.cpp\fP\&.
+.SS "void Getargv::Argv::print ()"
+
+.PP
+Prints the bytes of the arguments this struct represents to stdout\&. This method prints the bytes to stdout including the delimiting bytes (whether ␀ bytes or spaces) from the first argument not skipped over, to the last\&.
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If printing fails, an exception is thrown containing the errno\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB13\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::size () const \-> ptrdiff_t"
+
+.PP
+returns the number of bytes in the arguments this struct represents\&. 
+.PP
+\fBReturns\fP
+.RS 4
+the number of bytes in the arguments this struct represents\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB28\fP of file \fBargv\&.cpp\fP\&.
+.SS "auto Getargv::Argv::to_string () \-> \fBstd::string\fP"
+
+.PP
+This function converts an \fBArgv\fP into a \fBstd::string\fP\&. This function creates a \fBstd::string\fP representing the args of the \fBArgv\fP\&.
+.PP
+\fBAttention\fP
+.RS 4
+Note that the arguments of a process on macOS are not guaranteed to be in any encoding, and therefore should be treated with caution\&. Particularly, unless nuls is set to true, there can be internal ␀ bytes in the returned string\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+A \fBstd::string\fP representing the arguments of the targetted pid, formatted as requested\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_string()\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB71\fP of file \fBargv\&.cpp\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgetargv++ from the source code\&.

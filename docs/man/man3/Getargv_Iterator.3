@@ -1,0 +1,471 @@
+.TH "Getargv::Iterator< T >" 3 "Version 0.1" "libgetargv++" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Getargv::Iterator< T > \- A template that turns a pointer to a C style array into a C++ contiguous iterator\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <iter\&.hpp>\fP
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "using \fBiterator_concept\fP = \fBstd::contiguous_iterator_tag\fP"
+.br
+.RI "A marker for the capabilities of this \fBIterator\fP\&. This is the strongest type of iterator in C++ >= 20, and we can satisfy the requirements, so users can use this \fBIterator\fP with as many algorithms from \fBstd::algorithm\fP as possible\&. "
+.ti -1c
+.RI "using \fBdifference_type\fP = \fBstd::ptrdiff_t\fP"
+.br
+.RI "This is the type that represents the distance between two Iterators\&. The Iterators being compared must point to the same backing buffer, or you get UB\&. "
+.ti -1c
+.RI "using \fBelement_type\fP = T"
+.br
+.RI "This is the type of the elements this iterator provides access to\&. The type of the iterator's elements/values is provided as a template parameter when this template is instantiated\&. "
+.ti -1c
+.RI "using \fBvalue_type\fP = \fBelement_type\fP"
+.br
+.RI "This is the type of the values this iterator provides access to\&. The type of the iterator's elements/values is provided as a template parameter when this template is instantiated\&. "
+.ti -1c
+.RI "using \fBpointer\fP = \fBelement_type\fP *"
+.br
+.RI "The type of a pointer to an element this \fBIterator\fP provides access to\&. "
+.ti -1c
+.RI "using \fBreference\fP = \fBelement_type\fP &"
+.br
+.RI "The type of a reference to an element this \fBIterator\fP provides access to\&. "
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBIterator\fP ()=default"
+.br
+.RI "The default constructor\&. This constructor creates an empty iterator with no backing buffer\&. The iterator this constructor creates is not usable for anything, but is required to conform to the contiguous_iterator concept\&. "
+.ti -1c
+.RI "\fBIterator\fP (\fBpointer\fP ptr)"
+.br
+.RI "A constructor that takes a pointer (C array)\&. "
+.ti -1c
+.RI "auto \fBoperator*\fP () const \-> \fBreference\fP"
+.br
+.RI "The indirection operator\&. "
+.ti -1c
+.RI "auto \fBoperator\->\fP () const \-> \fBpointer\fP"
+.br
+.RI "The pointer to member of pointer operator\&. "
+.ti -1c
+.RI "auto \fBoperator++\fP () \-> \fBIterator\fP &"
+.br
+.RI "The prefix increment operator\&. "
+.ti -1c
+.RI "auto \fBoperator++\fP (int) \-> \fBIterator\fP"
+.br
+.RI "The postfix increment operator\&. "
+.ti -1c
+.RI "auto \fBoperator+=\fP (int offset) \-> \fBIterator\fP &"
+.br
+.RI "The addition assignment operator\&. "
+.ti -1c
+.RI "auto \fBoperator+\fP (const \fBdifference_type\fP other) const \-> \fBIterator\fP"
+.br
+.RI "The addition operator\&. "
+.ti -1c
+.RI "auto \fBoperator\-\-\fP () \-> \fBIterator\fP &"
+.br
+.RI "The prefix decrement operator\&. "
+.ti -1c
+.RI "auto \fBoperator\-\-\fP (int) \-> \fBIterator\fP"
+.br
+.RI "The postfix decrement operator\&. "
+.ti -1c
+.RI "auto \fBoperator\-=\fP (int offset) \-> \fBIterator\fP &"
+.br
+.RI "The subtraction assignment operator\&. "
+.ti -1c
+.RI "auto \fBoperator\-\fP (const \fBIterator\fP &other) const \-> \fBdifference_type\fP"
+.br
+.RI "The subtraction operator (iterator overload)\&. "
+.ti -1c
+.RI "auto \fBoperator\-\fP (const \fBdifference_type\fP other) const \-> \fBIterator\fP"
+.br
+.RI "The subtraction operator (offset overload)\&. "
+.ti -1c
+.RI "auto \fBoperator[]\fP (\fBdifference_type\fP idx) const \-> \fBreference\fP"
+.br
+.RI "The index operator\&. "
+.ti -1c
+.RI "auto \fBoperator<=>\fP (const \fBIterator\fP &other) const =default"
+.br
+.RI "The three-way comparison operator\&. "
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "auto \fBoperator+\fP (const \fBdifference_type\fP value, const \fBIterator\fP &other) \-> \fBIterator\fP"
+.br
+.RI "The friend addition operator\&. "
+.ti -1c
+.RI "auto \fBoperator\-\fP (const \fBdifference_type\fP value, const \fBIterator\fP &other) \-> \fBIterator\fP"
+.br
+.RI "The friend subtraction operator (iterator and offset)\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.SS "template<typename T>
+.br
+struct Getargv::Iterator< T >"A template that turns a pointer to a C style array into a C++ contiguous iterator\&. 
+
+The type parameter for this template is the \fBelement_type\fP that the C array's pointer points to\&. The generated \fBIterator\fP struct is a contiguous iterator since C++ 20, and a random access iterator in C++ versions prior to C++ 20\&.
+.PP
+All operations are pointer math, which is a big reason why this is a template, so I only have to make sure one impl works\&. 
+.PP
+Definition at line \fB22\fP of file \fBiter\&.hpp\fP\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "template<typename T > using \fBGetargv::Iterator\fP< T >::difference_type =  \fBstd::ptrdiff_t\fP"
+
+.PP
+This is the type that represents the distance between two Iterators\&. The Iterators being compared must point to the same backing buffer, or you get UB\&. 
+.PP
+Definition at line \fB42\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > using \fBGetargv::Iterator\fP< T >::element_type =  T"
+
+.PP
+This is the type of the elements this iterator provides access to\&. The type of the iterator's elements/values is provided as a template parameter when this template is instantiated\&. 
+.PP
+Definition at line \fB48\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > using \fBGetargv::Iterator\fP< T >::iterator_concept =  \fBstd::contiguous_iterator_tag\fP"
+
+.PP
+A marker for the capabilities of this \fBIterator\fP\&. This is the strongest type of iterator in C++ >= 20, and we can satisfy the requirements, so users can use this \fBIterator\fP with as many algorithms from \fBstd::algorithm\fP as possible\&. 
+.PP
+Definition at line \fB29\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > using \fBGetargv::Iterator\fP< T >::pointer =  \fBelement_type\fP*"
+
+.PP
+The type of a pointer to an element this \fBIterator\fP provides access to\&. 
+.PP
+Definition at line \fB61\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > using \fBGetargv::Iterator\fP< T >::reference =  \fBelement_type\fP&"
+
+.PP
+The type of a reference to an element this \fBIterator\fP provides access to\&. 
+.PP
+\fBWarning\fP
+.RS 4
+Trying to create a reference from an end \fBIterator\fP or an \fBIterator\fP that has been incremented or decremented beyond the underlying array is UB\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB68\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > using \fBGetargv::Iterator\fP< T >::value_type =  \fBelement_type\fP"
+
+.PP
+This is the type of the values this iterator provides access to\&. The type of the iterator's elements/values is provided as a template parameter when this template is instantiated\&. 
+.PP
+\fBRemarks\fP
+.RS 4
+Clang++ doesn't seem to need this type specified, but everyone online says it's needed… 
+.RE
+.PP
+
+.PP
+Definition at line \fB56\fP of file \fBiter\&.hpp\fP\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename T > \fBGetargv::Iterator\fP< T >::Iterator (\fBpointer\fP ptr)\fC [inline]\fP, \fC [explicit]\fP"
+
+.PP
+A constructor that takes a pointer (C array)\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIptr\fP A pointer to an array of values/elements of \fBelement_type\fP, or 1 past the end of the array in the case of the end iterator\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+The iterator does not own the backing buffer, so the iterator is invalidated when the buffer is freed\&. There is no way of knowing based on the iterator itself if it has been invalidated\&.
+.PP
+The type pointed to by the pointer passed to this constructor must match the type parameter used when instantiating the template\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB89\fP of file \fBiter\&.hpp\fP\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator* () const \-> \fBreference\fP \fC [inline]\fP"
+
+.PP
+The indirection operator\&. This operator returns the underlying \fBelement_type\fP the iterator currently points to\&.
+.PP
+\fBReturns\fP
+.RS 4
+A \fBreference\fP to the element of the array that the \fBIterator\fP currently points to\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Trying to dereference an end iterator or an iterator that has been incremented to or beyond the end iterator, or decremented beyond the start iterator is UB\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB103\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator+ (const \fBdifference_type\fP other) const \-> \fBIterator\fP \fC [inline]\fP"
+
+.PP
+The addition operator\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIother\fP the number of elements the returned iterator should be advanced by\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an \fBIterator\fP advanced by the passed in number of positions\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB166\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator++ () \-> \fBIterator\fP& \fC [inline]\fP"
+
+.PP
+The prefix increment operator\&. This operator advances the iterator and returns itself\&.
+.PP
+\fBReturns\fP
+.RS 4
+itself 
+.RE
+.PP
+
+.PP
+Definition at line \fB127\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator++ (int) \-> \fBIterator\fP \fC [inline]\fP"
+
+.PP
+The postfix increment operator\&. This operator advances the iterator and returns an \fBIterator\fP pointing to the old position\&.
+.PP
+\fBReturns\fP
+.RS 4
+an \fBIterator\fP pointing to the old position of this iterator\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB139\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator+= (int offset) \-> \fBIterator\fP& \fC [inline]\fP"
+
+.PP
+The addition assignment operator\&. Advances the \fBIterator\fP by the passed in number of positions and returns itself\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIoffset\fP the number of elements to advance the iterator by\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+itself 
+.RE
+.PP
+
+.PP
+Definition at line \fB154\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator\- (const \fBdifference_type\fP other) const \-> \fBIterator\fP \fC [inline]\fP"
+
+.PP
+The subtraction operator (offset overload)\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIother\fP the number of positions to recede the returned \fBIterator\fP\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an \fBIterator\fP receded by the passed in number of positions\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+The passed in iterator must point to the same backing buffer or this is UB\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB241\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator\- (const \fBIterator\fP< T > & other) const \-> \fBdifference_type\fP \fC [inline]\fP"
+
+.PP
+The subtraction operator (iterator overload)\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIother\fP the other \fBIterator\fP to find the distance from\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+the distance between the passed \fBIterator\fP and this one\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB228\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator\-\- () \-> \fBIterator\fP& \fC [inline]\fP"
+
+.PP
+The prefix decrement operator\&. This operator recedes the iterator and returns itself\&.
+.PP
+\fBReturns\fP
+.RS 4
+itself 
+.RE
+.PP
+
+.PP
+Definition at line \fB190\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator\-\- (int) \-> \fBIterator\fP \fC [inline]\fP"
+
+.PP
+The postfix decrement operator\&. This operator recedes the \fBIterator\fP and returns an \fBIterator\fP pointing to the old position\&.
+.PP
+\fBReturns\fP
+.RS 4
+an \fBIterator\fP pointing to the old position of this iterator\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB202\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator\-= (int offset) \-> \fBIterator\fP& \fC [inline]\fP"
+
+.PP
+The subtraction assignment operator\&. Recedes the \fBIterator\fP by the passed in number of positions, and returns itself\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIoffset\fP the number of elements to recede the iterator by\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+itself 
+.RE
+.PP
+
+.PP
+Definition at line \fB217\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator\-> () const \-> \fBpointer\fP \fC [inline]\fP"
+
+.PP
+The pointer to member of pointer operator\&. This operator is only useful when the \fBelement_type\fP of this iterator is a struct or class, and allows you to access members of the element pointed to by the iterator\&.
+.PP
+\fBReturns\fP
+.RS 4
+the underlying pointer of this \fBIterator\fP\&. But more practically, the compiler then uses that pointer to provide access to a member of the pointed to struct\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Trying to use this operator on an end iterator or an iterator that has been incremented or decremented beyond the bounds of the underlying array is UB\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB119\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator<=> (const \fBIterator\fP< T > & other) const\fC [default]\fP"
+
+.PP
+The three-way comparison operator\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIother\fP The iterator to compare this one to\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+\fBstd::strong_ordering::less\fP if the other iterator is less than this one, \fBstd::strong_ordering::equal\fP if they are equal, and \fBstd::strong_ordering::greater\fP if the other iterator is greater than this one\&. 
+.RE
+.PP
+
+.SS "template<typename T > auto \fBGetargv::Iterator\fP< T >::operator[] (\fBdifference_type\fP idx) const \-> \fBreference\fP \fC [inline]\fP"
+
+.PP
+The index operator\&. This operator returns the underlying \fBelement_type\fP the passed in number of positions removed from the position the iterator currently points to\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIidx\fP the offset of the requested element from the current position of this \fBIterator\fP\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+a \fBreference\fP to an element idx positions removed from this \fBIterator\fP's current position\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+passing in an offset that would put the iterator beyond the bounds of the underlying array is UB\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB272\fP of file \fBiter\&.hpp\fP\&.
+.SH "Friends And Related Symbol Documentation"
+.PP 
+.SS "template<typename T > auto operator+ (const \fBdifference_type\fP value, const \fBIterator\fP< T > & other) \-> \fBIterator\fP \fC [friend]\fP"
+
+.PP
+The friend addition operator\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIvalue\fP the number of elements the returned \fBIterator\fP should be advanced by\&.
+.br
+\fIother\fP the \fBIterator\fP that provides the address to advance from\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an iterator which is the passed in \fBIterator\fP advanced by the passed in number of positions\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB179\fP of file \fBiter\&.hpp\fP\&.
+.SS "template<typename T > auto operator\- (const \fBdifference_type\fP value, const \fBIterator\fP< T > & other) \-> \fBIterator\fP \fC [friend]\fP"
+
+.PP
+The friend subtraction operator (iterator and offset)\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIvalue\fP the number of positions to recede the returned \fBIterator\fP\&.
+.br
+\fIother\fP the \fBIterator\fP that provides the address to recede from\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+an iterator which is the passed in \fBIterator\fP receded by the passed in number of positions\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB252\fP of file \fBiter\&.hpp\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgetargv++ from the source code\&.

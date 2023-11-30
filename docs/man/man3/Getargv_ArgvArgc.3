@@ -1,0 +1,356 @@
+.TH "Getargv::ArgvArgc" 3 "Version 0.1" "libgetargv++" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Getargv::ArgvArgc \- This struct provides an iterable representation of the arguments of the passed in pid\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <libgetargv++\&.hpp>\fP
+.PP
+Inherits ffi::ArgvArgcResult\&.
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "using \fBIterator\fP = \fBIterator\fP< char * >"
+.br
+.RI "The type of iterator provided by \fBbegin()\fP and \fBend()\fP "
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "NODISCARD auto \fBto_string_array\fP () const noexcept(false) \-> \fBstd::vector\fP< \fBstd::string\fP >"
+.br
+.RI "This function converts an \fBArgvArgc\fP into a \fBstd::vector<std::string>\fP\&. "
+.ti -1c
+.RI "\fBArgvArgc\fP (\fBArgvArgc\fP &other)=delete"
+.br
+.ti -1c
+.RI "\fBArgvArgc\fP (pid_t pid) noexcept(false)"
+.br
+.RI "This is a constructor for the \fBArgvArgc\fP struct representing the args of pid\&. "
+.ti -1c
+.RI "\fBArgvArgc\fP (\fBArgvArgc\fP &&other)=default"
+.br
+.RI "Default move constructor\&. "
+.ti -1c
+.RI "\fBArgvArgc\fP (ffi::ArgvArgcResult &&ffiResult)"
+.br
+.RI "Constructor to convert C struct into C++ struct\&. "
+.ti -1c
+.RI "\fB~ArgvArgc\fP ()"
+.br
+.RI "This is the destructor for this struct\&. "
+.ti -1c
+.RI "auto \fBoperator[]\fP (ptrdiff_t index) const \-> char *&"
+.br
+.RI "index operator to access a C string (char*) at supplied offset (0 indexed) "
+.ti -1c
+.RI "NODISCARD auto \fBsize\fP () const \-> ptrdiff_t"
+.br
+.RI "returns the number of arguments this struct represents "
+.ti -1c
+.RI "NODISCARD auto \fBempty\fP () const \-> bool"
+.br
+.RI "returns true if the targetted process had no arguments "
+.ti -1c
+.RI "NODISCARD auto \fBbegin\fP () const \-> \fBIterator\fP"
+.br
+.RI "returns a begin iterator\&. "
+.ti -1c
+.RI "NODISCARD auto \fBend\fP () const \-> \fBIterator\fP"
+.br
+.RI "returns an end iterator\&. "
+.in -1c
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static auto \fBas_array\fP (pid_t pid) noexcept(false) \-> \fBArgvArgc\fP"
+.br
+.RI "This function creates an \fBArgvArgc\fP struct for the args of pid\&. "
+.ti -1c
+.RI "static auto \fBas_string_array\fP (pid_t pid) noexcept(false) \-> \fBstd::vector\fP< \fBstd::string\fP >"
+.br
+.RI "This function constructs an \fBArgvArgc\fP but then converts the result into a \fBstd::vector<std::string>\fP\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+This struct provides an iterable representation of the arguments of the passed in pid\&. 
+
+
+.PP
+\fBAuthor\fP
+.RS 4
+Camden Narzt
+.RE
+.PP
+This struct is a C++ implementation of the ArgvArgcResult struct from the C libgetargv\&. You create this struct with the \fBas_array()\fP function\&. This struct adds the following functionality to the C struct: 
+.PD 0
+.IP "\(bu" 1
+It provides an iterator over the arguments\&. 
+.IP "\(bu" 1
+It reports its size, and if it is empty\&. 
+.IP "\(bu" 1
+It cleans up the backing buffers automatically using the correct free function\&.
+.PP
+This struct is best suited to inspection and/or manipulation of the arguments\&. If you only want to print the arguments, then the \fBArgv\fP struct is a better choice\&.
+.PP
+\fBRemarks\fP
+.RS 4
+Due to being backed by buffers allocated by the C lib, this struct cannot be copied, only moved\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB251\fP of file \fBlibgetargv++\&.hpp\fP\&.
+.SH "Member Typedef Documentation"
+.PP 
+.SS "using \fBGetargv::ArgvArgc::Iterator\fP =  \fBIterator\fP<char*>"
+
+.PP
+The type of iterator provided by \fBbegin()\fP and \fBend()\fP This iterator is a \fBstd::contiguous_iterator_tag\fP (since C++ 20) or a \fBstd::random_access_iterator_tag\fP (prior to C++ 20)\&. This is an iterator over the C strings (char*) representating the arguments this struct represents\&. 
+.PP
+Definition at line \fB259\fP of file \fBlibgetargv++\&.hpp\fP\&.
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Getargv::ArgvArgc::ArgvArgc (\fBArgvArgc\fP & other)\fC [delete]\fP"
+Due to being backed by buffers allocated by the C lib, this struct cannot be copied, only moved\&.
+.PP
+Rationale for non-copyability: 
+.PD 0
+.IP "\(bu" 1
+memory blocks returned from calls to malloc must be released by calls to free from the same allocator\&. 
+.IP "\(bu" 1
+this struct must clean up its backing buffers using the provided C-lib function to release the memory to ensure the correct free() is called\&. 
+.IP "\(bu" 1
+if a shallow copy were made of this struct, the buffers would be released by each copy of the struct which is not allowed\&. 
+.IP "\(bu" 1
+if a new backing buffer were allocated from C++, the call to the C free() function may not match\&. 
+.IP "\(bu" 1
+adding additional member variables to track if the buffers were allocated from C or C++ could change the layout of the struct, making the C function that frees the buffers not work\&. 
+.PP
+
+.SS "Getargv::ArgvArgc::ArgvArgc (pid_t pid)\fC [explicit]\fP"
+
+.PP
+This is a constructor for the \fBArgvArgc\fP struct representing the args of pid\&. This constructor wraps the C api for creating an ffi::ArgvArgcResult and handles failure by throwing an exception\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIpid\fP the pid of the process whose arguments are requested\&.
+.RE
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If the underlying sysctl fails, an exception is thrown containing the errno\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_array\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB41\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "Getargv::ArgvArgc::ArgvArgc (ffi::ArgvArgcResult && ffiResult)\fC [explicit]\fP"
+
+.PP
+Constructor to convert C struct into C++ struct\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIffiResult\fP the ffi::ArgvArgcResult from which to make an \fBArgvArgc\fP\&.
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Do not free the C struct's buffers after calling this constructor, they are adopted by this struct, and freed when this struct is destructed\&. 
+.RE
+.PP
+
+.PP
+Definition at line \fB6\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "Getargv::ArgvArgc::~ArgvArgc ()"
+
+.PP
+This is the destructor for this struct\&. This destructor calls the C api to clean up the backing buffers using the correct free() function\&. Due to the need for malloc/free to match, this destructor is not safe for buffers allocated from C++\&. 
+.PP
+Definition at line \fB12\fP of file \fBargvargc\&.cpp\fP\&.
+.SH "Member Function Documentation"
+.PP 
+.SS "auto Getargv::ArgvArgc::as_array (pid_t pid) \-> \fBArgvArgc\fP\fC [static]\fP"
+
+.PP
+This function creates an \fBArgvArgc\fP struct for the args of pid\&. This function is an alias for the constructor with the same argument\&. It exists to provide a counterpart to the \fBas_array()\fP function\&.
+.PP
+\fBParameters\fP
+.RS 4
+\fIpid\fP the pid of the process whose arguments are requested\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+The \fBArgvArgc\fP struct representing the arguments of the targetted pid\&.
+.RE
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If the underlying sysctl fails, an exception is thrown containing the errno\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_array()\fP 
+.PP
+ArgvArgc(pid) 
+.RE
+.PP
+
+.PP
+Definition at line \fB39\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::as_string_array (pid_t pid) \-> \fBstd::vector\fP<\fBstd::string\fP>\fC [static]\fP"
+
+.PP
+This function constructs an \fBArgvArgc\fP but then converts the result into a \fBstd::vector<std::string>\fP\&. This function creates a \fBstd::vector\fP containing \fBstd::string\fP representations of the args of pid\&. It calls the ArgvArgc(pid) constructor, and takes the same argument and raises the same exceptions\&.
+.PP
+\fBAttention\fP
+.RS 4
+Note that the arguments of a process on macOS are not guaranteed to be in any encoding, and therefore should be treated with caution\&.
+.RE
+.PP
+\fBParameters\fP
+.RS 4
+\fIpid\fP the pid of the process whose arguments are requested\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+A std::vector<std::string> representing the arguments of the targetted pid\&.
+.RE
+.PP
+\fBExceptions\fP
+.RS 4
+\fI\fBstd::system_error\fP\fP If the underlying sysctl fails, an exception is thrown containing the errno\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_array()\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB55\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::begin () const \-> \fBIterator\fP"
+
+.PP
+returns a begin iterator\&. 
+.PP
+\fBReturns\fP
+.RS 4
+an iterator pointing to the first argument represented by this struct\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBIterator\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB18\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::empty () const \-> bool"
+
+.PP
+returns true if the targetted process had no arguments 
+.PP
+\fBReturns\fP
+.RS 4
+true if the targetted process had no arguments 
+.RE
+.PP
+
+.PP
+Definition at line \fB16\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::end () const \-> \fBIterator\fP"
+
+.PP
+returns an end iterator\&. 
+.PP
+\fBReturns\fP
+.RS 4
+an iterator pointing to just after the last argument represented by this struct\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBIterator\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB22\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::operator[] (ptrdiff_t index) const \-> char*&"
+
+.PP
+index operator to access a C string (char*) at supplied offset (0 indexed) 
+.PP
+\fBParameters\fP
+.RS 4
+\fIindex\fP the offset into the underlying array for the desired argument\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+a C string at the specified offset from the arguments this struct represents\&.
+.RE
+.PP
+/remark C strings (char*) auto convert to \fBstd::string\fP on assignment and when passed to functions, so there's no need to return a \fBstd::string\fP here\&. 
+.PP
+Definition at line \fB26\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::size () const \-> ptrdiff_t"
+
+.PP
+returns the number of arguments this struct represents 
+.PP
+\fBReturns\fP
+.RS 4
+the number of arguments this struct represents 
+.RE
+.PP
+
+.PP
+Definition at line \fB14\fP of file \fBargvargc\&.cpp\fP\&.
+.SS "auto Getargv::ArgvArgc::to_string_array () const \-> \fBstd::vector\fP<\fBstd::string\fP>"
+
+.PP
+This function converts an \fBArgvArgc\fP into a \fBstd::vector<std::string>\fP\&. This function creates a \fBstd::vector\fP containing \fBstd::string\fP representations of the args represented by the \fBArgvArgc\fP\&.
+.PP
+\fBAttention\fP
+.RS 4
+Note that the arguments of a process on macOS are not guaranteed to be in any encoding, and therefore should be treated with caution\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+A std::vector<std::string> representing the arguments of the \fBArgvArgc\fP\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBas_string_array()\fP 
+.RE
+.PP
+
+.PP
+Definition at line \fB48\fP of file \fBargvargc\&.cpp\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgetargv++ from the source code\&.
