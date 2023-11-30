@@ -98,18 +98,31 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        repository: getargv/getargv
+        path: getargv
+        token: ${{ secrets.GH_PAT }}
+    - name: Build libgetargv
+      run: make install_dylib
+      working-directory: getargv
+    - uses: actions/checkout@v4
+      with:
+        path: getargv.cpp
     - name: make library
       run: make dylib
+      working-directory: getargv.cpp
     - name: make installer
       run: make dmg
+      working-directory: getargv.cpp
     - name: rename dmg
       run: mv pkg/*.dmg pkg/getargv-${{ matrix.os }}.dmg
+      working-directory: getargv.cpp
     - uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.os }}.zip
         path: |
-          pkg/*.pkg
-          pkg/*.dmg
+          getargv.cpp/pkg/*.pkg
+          getargv.cpp/pkg/*.dmg
 
   release:
     if: ${{ github.ref_type == 'tag' }}
