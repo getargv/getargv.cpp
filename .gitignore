@@ -12,3 +12,5 @@ compile_commands.json
 /test/share
 default.profraw
 /test/include
+/pkg
+/fakeroot

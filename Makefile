@@ -1,45 +1,11 @@
-LIBVER ?=$(shell vtool -show-build $(shell brew --prefix)/lib/libgetargv.dylib | awk '/minos/{print $$2}')
-export MACOSX_DEPLOYMENT_TARGET=$(LIBVER)
-VERSION=0.1
-COMPAT_VERSION := $(shell echo $(VERSION) | cut -f1 -d.).0
+include Makefile-variables
 
-CODESIGN_PREFIX := cam.narzt.
-KEYCHAIN := ~/Library/Keychains/login.keychain-db
-CERT_IDENTITY := $(shell security find-identity -v -p codesigning | sed -Ee 's/.*"([^"]+)".*/\1/g' | grep -Fve ' valid identit' -e ' CA')
-
-SRC_DIR = src
-OBJ_DIR = obj
-LIB_DIR = lib
-
-PREFIX := /usr/local
-CXX=clang++
-CPPFLAGS += -MMD -MP
-
-COMPILER_VERSION		:= $(shell $(CXX) --version | grep version | grep -o -m 1 "[0-9]\+\.[0-9]\+\.*[0-9]*" | head -n 1)
-COMPILER_VERSION_NUMBER		:= $(shell echo $(COMPILER_VERSION) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$$/&00/')
-CLANG_13_OR_MORE		:= $(shell expr $(COMPILER_VERSION_NUMBER) \>= 130106)
-ifneq ($(CLANG_13_OR_MORE),0)
-# supported: c++11, c++14, c++17, c++20
-# future: c++2b
-CXXFLAGS := --std=c++20 -O3 -Iinclude
-else
-CXXFLAGS := --std=c++17 -O3 -Iinclude
-endif
-
-EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
-LDFLAGS += -Llib -fvisibility=default -fPIC
-LDLIBS += -lgetargv
-
-LIB_SHORT_NAME = getargv++
-DYLIB_FILENAME = lib$(LIB_SHORT_NAME).$(VERSION).dylib
-DYLIB = lib/$(DYLIB_FILENAME)
-SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
-OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-
-.PHONY := db clean dylib install_dylib lint
+.PHONY := db clean dylib install install_dylib lint dmg
 .DEFAULT_GOAL := dylib
 
 dylib: $(DYLIB)
+
+install: install_dylib
 
 install_dylib: $(DYLIB)
 	install -d $(PREFIX)/$(LIB_DIR)
@@ -62,10 +28,10 @@ $(DYLIB): $(OBJECTS) | $(LIB_DIR)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 	$(CXX) $(EXTRA_CXXFLAGS) $(CXXFLAGS) $(CPPFLAGS) -c -fPIC $< -o $@
 
-$(OBJ_DIR) $(LIB_DIR):
+$(OBJ_DIR) $(LIB_DIR) $(FAKE_ROOT) $(PKG_DIR):
 	mkdir -p $@
 
-docs:
+docs: doxygen.conf $(SOURCES) $(HEADERS)
 	doxygen -q doxygen.conf
 
 db: compile_commands.json
@@ -74,10 +40,46 @@ compile_commands.json: Makefile
 	$(shell brew --prefix bear)/bin/bear -- make -B $(OBJECTS)
 
 clean:
-	@$(RM) -rf $(OBJ_DIR) $(LIB_DIR) docs
+	@$(RM) -rf $(OBJ_DIR) $(LIB_DIR) docs $(FAKE_ROOT) $(PKG_DIR)
 
 lint: compile_commands.json
 	for file in $(SOURCES); do /usr/bin/xcrun -r clangd --enable-config --clang-tidy --log=error --check=$$file; done
 	$(shell brew --prefix llvm)/bin/scan-build -enable-checker security -enable-checker unix -enable-checker valist $(MAKE) -B dylib
+
+dmg: $(DMG)
+
+$(DMG): $(PRODUCT)
+	hdiutil create -fs "$(DMG_FS)" -volname "$(DMG_VOLUME_NAME)" -srcfolder "$(PKG_DIR)" -ov -format "$(DMG_FORMAT)" "$@"
+
+$(DISTRIBUTION): $(SRC_DIR)/dist.xml
+	< $< > $@ sed \
+	-e 's/OS_VERSION/$(MACOS_VER_NUM)/g' \
+	-e 's/ARCH/$(ARCH)/g' \
+	-e 's/VERSION/$(VERSION)/g' \
+	-e 's/LIB_PKG_NAME/$(LIB_PKG:$(PKG_DIR)/%=%)/g' \
+	-e 's/LIB_ID/$(LIB_BUNDLE_IDENTIFIER)/g' \
+	-e 's/LIB_NAME/$(LIB_NAME)/g'
+
+$(PRODUCT): $(LIB_PKG) $(DISTRIBUTION)
+	productbuild \
+	--identifier $(PRODUCT_BUNDLE_IDENTIFIER) \
+	--version $(VERSION) \
+	--package-path $(PKG_DIR) \
+	--resources ./ \
+	--distribution $(DISTRIBUTION) \
+	$(SIGN_PACKAGE_FLAG) \
+	$@
+	@$(RM) $^
+
+$(LIB_PKG): $(FAKE_ROOT) | $(PKG_DIR)
+	@$(RM) -rf $(FAKE_ROOT)/*
+	$(MAKE) PREFIX=$(FAKE_ROOT) install_dylib
+	pkgbuild --root $(FAKE_ROOT) \
+	--identifier "$(LIB_BUNDLE_IDENTIFIER)" \
+	--version "$(VERSION)" \
+	$(PKG_VERSION_FLAG) \
+	--install-location "$(PREFIX)" \
+	$(SIGN_PACKAGE_FLAG) \
+	$@
 
 -include $(OBJECTS:.o=.d)

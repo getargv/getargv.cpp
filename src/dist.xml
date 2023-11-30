@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="OS_VERSION" />
+        </allowed-os-versions>
+    </volume-check>
+
+    <license file="LICENSE" mime-type="text/plain" />
+
+    <options customize="allow" require-scripts="false" hostArchitectures="ARCH" />
+
+    <choices-outline>
+        <line choice="LIB_ID" />
+    </choices-outline>
+    <choice title="LIB_NAME library" id="LIB_ID" customLocation="/usr/local" customLocationAllowAlternateVolumes="true">
+        <pkg-ref id="LIB_ID" />
+    </choice>
+    <pkg-ref id="LIB_ID" version="VERSION" onConclusion="none">LIB_PKG_NAME</pkg-ref>
+</installer-gui-script>
