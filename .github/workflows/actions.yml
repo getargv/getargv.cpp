@@ -115,7 +115,7 @@ jobs:
       run: make dmg
       working-directory: getargv.cpp
     - name: rename dmg
-      run: mv pkg/*.dmg pkg/getargv-${{ matrix.os }}.dmg
+      run: mv pkg/*.dmg pkg/libgetargv++-${{ matrix.os }}.dmg
       working-directory: getargv.cpp
     - uses: actions/upload-artifact@v3
       with:
