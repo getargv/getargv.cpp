@@ -14,7 +14,7 @@ This is a library providing a more idiomatic C++ API wrapping the C API provided
 
 ### Step 1: Downloading
 
-You can download a [pre-built library with headers](http://url1), or an [installer package](http://url2) from GitHub.
+You can download a [source bundle](https://github.com/getargv/getargv.cpp/archive/refs/tags/0.1.tar.gz), or an [installer package](https://github.com/getargv/getargv.cpp/releases/download/0.1/libgetargv++-macos-13.dmg) from GitHub.
 
 ### Step 2: Installing
 
@@ -28,11 +28,8 @@ Be sure that your compiler can find this lib by checking the library and header 
 echo | clang++ -c -v -x c++ - 2>&1 | sed -Ee '/search starts here/,/End of search list/!d;/End of search list/q'
 ```
 
-\attention On Apple Silicon (ARM) Macs, Homebrew installs native packages in `/opt`,
-and puts Intel libraries in `/usr/local`, so your compiler will only
-automatically pick up Intel libraries, which is almost certainly not what you
-want. You need to explicitly exclude `/usr/local` from your search paths in
-this case and add `/opt/`.
+> [!IMPORTANT]
+> On Apple Silicon (ARM) Macs, Homebrew installs native packages in `/opt`, and puts Intel libraries in `/usr/local`, so your compiler will only automatically pick up Intel libraries, which is almost certainly not what you want. You need to explicitly exclude `/usr/local` from your search paths in this case and add `/opt/`.
 
 ### System Requirements
 
@@ -49,7 +46,7 @@ To make `libgetargv++`:
 
 To make `libgetargv` Clone [the repo](https://github.com/getargv/getargv) and run `make dylib`.
 
-I've built `libgetargv` on macOS 10.7-13, using only the CLT package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
+I've built `libgetargv` on macOS 10.7-14, using only the CLT package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
 
 ## Testing
 
@@ -61,11 +58,11 @@ I've tested libgetargv++ on macOS 10.7-14, and run CI against all available GitH
 
 ### Step 1: Choosing a struct
 
-Do you just want to print the arguments to stdout or look at the bytes of the arguments? Then you probably want the Argv struct, if you want to look at or parse the arguments, then you probably want the ArgvArgc struct. If you need to pass along the arguments to other functions that expect standard C++ types, then there are functions to give you those, however they are a bit less efficient as they involve additional copies.
+Do you just want to print the arguments to `stdout` or look at the bytes of the arguments? Then you probably want the `Argv` struct, if you want to look at or parse the arguments, then you probably want the `ArgvArgc` struct. If you need to pass along the arguments to other functions that expect standard C++ types, then there are functions to give you those, however they are a bit less efficient as they involve additional copies.
 
 ### Step 2: Choosing a constructor
 
-If you want to get a C++ type then `Argv::as_string()` or ArgvArgc::as_string_array()` are your friends, if you want just the bytes, then `Argv()` or `Argv::as_bytes()` are for you, and if you want to look at the args individually then `ArgvArgc()` or `ArgvArgc::as_array()` are what you want.
+If you want to get a C++ type then `Argv::as_string()` or `ArgvArgc::as_string_array()` are your friends, if you want just the bytes, then `Argv()` or `Argv::as_bytes()` are for you, and if you want to look at the args individually then `ArgvArgc()` or `ArgvArgc::as_array()` are what you want.
 
 ### Step 3: Iterating
 
