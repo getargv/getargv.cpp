@@ -170,7 +170,6 @@ auto get_stdout() -> std::string {
   char       buffer[size];
   char*      head = buffer;
   size_t     read = 0;
-
   do {
     read = fread(head, 1, size - (head - buffer), f_stdout);
     head += read;
@@ -221,15 +220,15 @@ ParameterizedTest(test_case* param, argv_argc, successful) {
 
   cr_assert_no_throw(
                      {
-                       Getargv::ArgvArgc results(pid);
+                       const Getargv::ArgvArgc results(pid);
                        cr_assert_eq(results.size(), param->argc);
                        cr_assert_eq(results.empty(), param->argc == 0);
                        for (int i = 0; i < param->argc; i++) {
                          cr_expect_str_eq(results[i], param->argv[i], "#%d: actual='%s' expected='%s'", param->argc, results[i], param->argv[i]);
 
-                         int         index    = (i + 1) * -1;
-                         std::string actual   = results[index];
-                         std::string expected = param->argv[(int)param->argc + index];
+                         const int         index    = (i + 1) * -1;
+                         const std::string actual   = results[index];
+                         const std::string expected = param->argv[(int)param->argc + index];
                          cr_expect_eq(actual, expected, "actual='%s' expected='%s'", actual.c_str(), expected.c_str());
                        }
                        size_t index = 0;
@@ -297,7 +296,7 @@ Test(print_argv_of_pid, failure) {
   const char*                   argv[] = { empty.c_str(), nullptr };
   cleanup(kill_pid) pid_t const pid    = array_spawn("bin/child", (char* const*)argv);
 
-  fclose(stdout);
+  (void)fclose(stdout);
   cr_assert_throw(Getargv::Argv(pid).print(), std::system_error);
 }
 
@@ -369,8 +368,8 @@ Test(argv_argc, to_string_array) {
 
   cr_assert_no_throw(
                      {
-                       Getargv::ArgvArgc        results(pid);
-                       std::vector<std::string> a = results.to_string_array();
+                       const Getargv::ArgvArgc        results(pid);
+                       const std::vector<std::string> array = results.to_string_array();
                      },
                      std::system_error,
                      "error thrown");
@@ -383,16 +382,16 @@ Test(argv_argc, as_string_array) {
 }
 
 Test(argv, convert_from_ffi_type) {
-  auto fn = []() -> Getargv::ffi::ArgvResult {
+  auto func = []() -> Getargv::ffi::ArgvResult {
     return {};
   };
-  Getargv::Argv const a(fn());
+  Getargv::Argv const array(func());
 }
 Test(argv_argc, convert_from_ffi_type) {
-  auto fn = []() -> Getargv::ffi::ArgvArgcResult {
+  auto func = []() -> Getargv::ffi::ArgvArgcResult {
     return {};
   };
-  Getargv::ArgvArgc const a(fn());
+  Getargv::ArgvArgc const array(func());
 }
 
 Test(argv_argc, fail_find_procargs) {
@@ -409,9 +408,9 @@ Test(argv, simple) {
 
   cr_expect_no_throw(
                      {
-                       Getargv::Argv proc_ptrs(pid, 0, true);
+                       const Getargv::Argv proc_ptrs(pid, 0, true);
                        cr_assert_eq(proc_ptrs.size(), expected.size());
-                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       const std::string actual(proc_ptrs.begin(), proc_ptrs.end());
                        cr_assert_eq(actual, expected);
                      },
                      std::system_error,
@@ -427,9 +426,9 @@ Test(argv, nuls_false) {
 
   cr_expect_no_throw(
                      {
-                       Getargv::Argv proc_ptrs(pid, 0, false);
+                       const Getargv::Argv proc_ptrs(pid, 0, false);
                        cr_assert_eq(proc_ptrs.size(), expected.size());
-                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       const std::string actual(proc_ptrs.begin(), proc_ptrs.end());
                        cr_assert_eq(actual, expected);
                      },
                      std::system_error,
@@ -446,9 +445,9 @@ Test(argv, nuls_true) {
 
   cr_expect_no_throw(
                      {
-                       Getargv::Argv proc_ptrs(pid, 0, true);
+                       const Getargv::Argv proc_ptrs(pid, 0, true);
                        cr_assert_eq(proc_ptrs.size(), expected.size());
-                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       const std::string actual(proc_ptrs.begin(), proc_ptrs.end());
                        cr_assert_eq(actual, expected);
                      },
                      std::system_error);
@@ -458,16 +457,16 @@ Test(argv, nuls_true) {
 Test(argv, skip_one) {
   cr_assert_no_throw(
                      {
-                       Getargv::Argv proc_ptrs(getppid(), 1, false);
+                       const Getargv::Argv proc_ptrs(getppid(), 1, false);
 
                        cr_assert_neq(proc_ptrs.size(), 0);
                        cr_expect_eq(*--proc_ptrs.end(), '\0');           // end of args to print
                        cr_expect_lt(proc_ptrs.begin(), proc_ptrs.end()); // whole buffer
 
-                       std::string buf1     = "--verbose\0002\0-j1"s;
-                       std::string buf2     = "-j0\0"s;
-                       std::string expected = (criterion_options.jobs > 0) ? buf1 : buf2;
-                       std::string actual(proc_ptrs.begin(), proc_ptrs.end());
+                       const std::string buf1     = "--verbose\0002\0-j1"s;
+                       const std::string buf2     = "-j0\0"s;
+                       const std::string expected = (criterion_options.jobs > 0) ? buf1 : buf2;
+                       const std::string actual(proc_ptrs.begin(), proc_ptrs.end());
                        cr_assert_eq(actual, expected, "'%.*s'[%ld] != '%.*s'[%ld]", (int)actual.size(), actual.c_str(), actual.size(), (int)expected.size(), expected.c_str(), expected.size());
                      },
                      std::system_error);
@@ -478,7 +477,7 @@ Test(argv, skip_all) {
 
   cr_assert_no_throw(
                      {
-                       Getargv::Argv proc_ptrs(getppid(), skip, false);
+                       const Getargv::Argv proc_ptrs(getppid(), skip, false);
 
                        cr_expect_eq(proc_ptrs.size(), 0);
                      },
@@ -487,17 +486,17 @@ Test(argv, skip_all) {
 
 Test(argv, skip_too_many) {
   errno = 0;
-  cr_assert_throw({ Getargv::Argv proc_ptrs(getpid(), 5, true); },
+  cr_assert_throw({ const Getargv::Argv proc_ptrs(getpid(), 5, true); },
                   std::system_error);
 }
 
 Test(argv, permissions) {
   errno = 0;
-  cr_assert_throw({ Getargv::Argv proc_ptrs(1, 5, true); }, std::system_error);
+  cr_assert_throw({ const Getargv::Argv proc_ptrs(1, 5, true); }, std::system_error);
 }
 
 Test(argv, not_exists) {
-  cr_assert_throw({ Getargv::Argv proc_ptrs(-1, 5, true); }, std::system_error);
+  cr_assert_throw({ const Getargv::Argv proc_ptrs(-1, 5, true); }, std::system_error);
 }
 
 void free_strings(struct criterion_test_params* crp) {
@@ -518,8 +517,8 @@ void free_argv_argc_test_case(struct criterion_test_params* crp) {
 
 void initialize_argv_argc_test_case(test_case* ptr) {
   ptr->argc = 0;
-  for (auto& i : ptr->argv) {
-    i = nullptr;
+  for (auto& index : ptr->argv) {
+    index = nullptr;
   }
 }
 
