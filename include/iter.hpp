@@ -285,22 +285,22 @@ struct Iterator {
 #else
   /** \brief The equality operator.
    */
-  bool operator==(const Iterator& other) const { return other._ptr == _ptr; }
+  bool operator==(const Iterator& other) const { return _ptr == other._ptr; }
   /** \brief The not equal to operator.
    */
-  bool operator!=(const Iterator& other) const { return other._ptr != _ptr; }
+  bool operator!=(const Iterator& other) const { return _ptr != other._ptr; }
   /** \brief The less than or equal to operator.
    */
-  bool operator<=(const Iterator& other) const { return other._ptr <= _ptr; }
+  bool operator<=(const Iterator& other) const { return _ptr <= other._ptr; }
   /** \brief The less than operator.
    */
-  bool operator<(const Iterator& other) const { return other._ptr < _ptr; }
+  bool operator<(const Iterator& other) const { return _ptr < other._ptr; }
   /** \brief The greater than or equal to operator.
    */
-  bool operator>=(const Iterator& other) const { return other._ptr >= _ptr; }
+  bool operator>=(const Iterator& other) const { return _ptr >= other._ptr; }
   /** \brief The greater than operator.
    */
-  bool operator>(const Iterator& other) const { return other._ptr > _ptr; }
+  bool operator>(const Iterator& other) const { return _ptr > other._ptr; }
 #endif
 
 private:
