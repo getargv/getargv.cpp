@@ -98,9 +98,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
-    - name: make exe
-      run: make CPU_FLAGS="" MACOS_VER_MINOR=0 release
-    - name: make CPU_FLAGS="" MACOS_VER_MINOR=0 library
+    - name: make library
       run: make dylib
     - name: make installer
       run: make dmg
