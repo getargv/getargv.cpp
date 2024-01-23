@@ -1,6 +1,6 @@
 include Makefile-variables
 
-.PHONY := db clean dylib install install_dylib lint dmg
+.PHONY := db clean dylib install install_dylib lint dmg bump tag
 .DEFAULT_GOAL := dylib
 
 dylib: $(DYLIB)
@@ -31,6 +31,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 $(OBJ_DIR) $(LIB_DIR) $(FAKE_ROOT) $(PKG_DIR):
 	mkdir -p $@
 
+bump: SHELL:=$(shell which bash)
 bump:
 	@ruby -e 'path = STDIN.read.strip;File.write(path, File.read(path).sub(/^(Version: +)([0-9]+)(?:(?:\.)([0-9]+)){1,}/){|s|"#{$$1}#{$$2}.#{$$3.to_i + 1}"})' <<< getargv++.pc
 	@ruby -e 'path = STDIN.read.strip;File.write(path, File.read(path).sub(/^(VERSION=)([0-9]+)(?:(?:\.)([0-9]+)){1,}/){|s|"#{$$1}#{$$2}.#{$$3.to_i + 1}"})' <<< Makefile-variables

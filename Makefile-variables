@@ -13,7 +13,7 @@ COMPAT_VERSION := $(shell echo $(VERSION) | cut -f1 -d.).0
 ARCH				:= $(shell uname -m)
 CODESIGN_PREFIX := cam.narzt.
 KEYCHAIN := ~/Library/Keychains/login.keychain-db
-CERT_IDENTITY := $(shell security find-identity -v -p codesigning | sed -Ee 's/.*"([^"]+)".*/\1/g' | grep -Fve ' valid identit' -e ' CA')
+CERT_IDENTITY ?= $(shell security find-identity -v -p codesigning | sed -Ee 's/.*"([^"]+)".*/\1/g' | grep -Fve ' valid identit' -e ' CA')
 
 SRC_DIR = src
 INCLUDE_DIR = include
