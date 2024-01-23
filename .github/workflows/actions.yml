@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-14
+          # - macos-14 # not available yet
           - macos-13
           - macos-12
           #- macos-11
@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - macos-14
+          # - macos-14 # not available yet
           - macos-13
           - macos-12
           #- macos-11
