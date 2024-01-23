@@ -31,6 +31,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
 $(OBJ_DIR) $(LIB_DIR) $(FAKE_ROOT) $(PKG_DIR):
 	mkdir -p $@
 
+bump:
+	@ruby -e 'path = STDIN.read.strip;File.write(path, File.read(path).sub(/^(Version: +)([0-9]+)(?:(?:\.)([0-9]+)){1,}/){|s|"#{$$1}#{$$2}.#{$$3.to_i + 1}"})' <<< getargv++.pc
+	@ruby -e 'path = STDIN.read.strip;File.write(path, File.read(path).sub(/^(VERSION=)([0-9]+)(?:(?:\.)([0-9]+)){1,}/){|s|"#{$$1}#{$$2}.#{$$3.to_i + 1}"})' <<< Makefile-variables
+	@ruby -e 'path = STDIN.read.strip;File.write(path, File.read(path).sub(/^(PROJECT_NUMBER += +)([0-9]+)(?:(?:\.)([0-9]+)){1,}/){|s|"#{$$1}#{$$2}.#{$$3.to_i + 1}"})' <<< doxygen.conf
+	@env PKG_CONFIG_PATH=. pkg-config --modversion getargv++
+
 docs: doxygen.conf $(SOURCES) $(HEADERS)
 	doxygen -q doxygen.conf
 
