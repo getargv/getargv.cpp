@@ -37,6 +37,12 @@ bump:
 	@ruby -e 'path = STDIN.read.strip;File.write(path, File.read(path).sub(/^(PROJECT_NUMBER += +)([0-9]+)(?:(?:\.)([0-9]+)){1,}/){|s|"#{$$1}#{$$2}.#{$$3.to_i + 1}"})' <<< doxygen.conf
 	@env PKG_CONFIG_PATH=. pkg-config --modversion getargv++
 
+tag:
+	git add -A
+	git commit -m 'version $(VERSION)'
+	git tag '$(VERSION)'
+	git push tag '$(VERSION)'
+
 docs: doxygen.conf $(SOURCES) $(HEADERS)
 	doxygen -q doxygen.conf
 
