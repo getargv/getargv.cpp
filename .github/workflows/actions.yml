@@ -108,6 +108,9 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: getargv.cpp
+    - name: bump version
+      run: make bump
+      working-directory: getargv.cpp
     - name: make library
       run: make dylib
       working-directory: getargv.cpp
@@ -125,16 +128,28 @@ jobs:
           getargv.cpp/pkg/*.dmg
 
   release:
-    if: ${{ github.ref_type == 'tag' }}
     needs: [ build ]
-    timeout-minutes: 5
-    runs-on: macos-latest
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
+      with:
+        path: getargv.cpp
     - uses: actions/download-artifact@v3
       with:
         path: pkg
+    - name: bump version
+      id: version
+      run: echo "version=$(make bump)" >> $GITHUB_OUTPUT
+      working-directory: getargv.cpp
+# do not merge these steps, version is scraped by makefile
+# at start of run, so needs to be bumped separately
+    - name: tag & commit
+      run: make tag
+      working-directory: getargv.cpp
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
         files: pkg/*.zip/*.dmg
-        name: ${{ github.ref_name }}
+        name: ${{ steps.version.ouputs.version }}
