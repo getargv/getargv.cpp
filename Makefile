@@ -42,7 +42,8 @@ tag:
 	git add -A
 	git commit -m 'version $(VERSION)'
 	git tag '$(VERSION)'
-	git push tag '$(VERSION)'
+	git push origin HEAD:main
+	git push origin tag '$(VERSION)'
 
 docs: doxygen.conf $(SOURCES) $(HEADERS)
 	doxygen -q doxygen.conf
