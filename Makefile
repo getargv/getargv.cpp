@@ -12,7 +12,9 @@ install_dylib: $(DYLIB)
 	install $(DYLIB) $(PREFIX)/$(DYLIB)
 	install_name_tool -id $(PREFIX)/$(DYLIB) $(PREFIX)/$(DYLIB)
 ifdef CERT_IDENTITY
+ifneq ($(CERT_IDENTITY),)
 	codesign --options runtime --prefix=$(CODESIGN_PREFIX) -s "$(CERT_IDENTITY)" --keychain $(KEYCHAIN) $(PREFIX)/$(DYLIB)
+endif
 endif
 	ln -sf ./$(DYLIB_FILENAME:%.$(VERSION).dylib=%.$(COMPAT_VERSION:%.0=%).dylib) $(PREFIX)/$(DYLIB:%.$(VERSION).dylib=%.dylib)
 	ln -sf ./$(DYLIB_FILENAME) $(PREFIX)/$(DYLIB:%.$(VERSION).dylib=%.$(COMPAT_VERSION:%.0=%.dylib))

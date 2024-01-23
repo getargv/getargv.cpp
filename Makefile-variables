@@ -1,4 +1,6 @@
-MACOS_VER_NUM ?=$(shell vtool -show-build $(shell brew --prefix)/lib/libgetargv.dylib | awk '/minos/{print $$2}')
+ifndef MACOS_VER_NUM
+MACOS_VER_NUM := $(shell vtool -show-build $(shell brew --prefix)/lib/libgetargv.dylib | awk '/minos/{print $$2}')
+endif
 MACOS_VER_MAJOR			:= $(shell echo $(MACOS_VER_NUM) | cut -f1 -d.)
 MACOS_VER_MINOR			:= $(shell echo $(MACOS_VER_NUM) | cut -f2 -d.)
 MACOS_LT_10_11			:= $(shell [ $(MACOS_VER_MAJOR) -eq 10 -a $(MACOS_VER_MINOR) -lt 11 ] && echo true)
@@ -12,8 +14,10 @@ VERSION=0.2
 COMPAT_VERSION := $(shell echo $(VERSION) | cut -f1 -d.).0
 ARCH				:= $(shell uname -m)
 CODESIGN_PREFIX := cam.narzt.
-KEYCHAIN := ~/Library/Keychains/login.keychain-db
-CERT_IDENTITY ?= $(shell security find-identity -v -p codesigning | sed -Ee 's/.*"([^"]+)".*/\1/g' | grep -Fve ' valid identit' -e ' CA')
+KEYCHAIN        := ~/Library/Keychains/login.keychain-db
+ifndef CERT_IDENTITY
+CERT_IDENTITY := $(shell security find-identity -v -p codesigning | sed -Ee 's/.*"([^"]+)".*/\1/g' | grep -Fve ' valid identit' -e ' CA')
+endif
 
 SRC_DIR = src
 INCLUDE_DIR = include
