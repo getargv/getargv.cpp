@@ -9,7 +9,6 @@ LIB_SHORT_NAME          := getargv++
 INCLUDE_DIR		:= include/$(LIB_SHORT_NAME)
 COV_DIR			:= coverage
 PREFIX			:= $(PWD)
-BREW_PREFIX		:= $(shell /usr/bin/env -P /usr/local/bin:/opt/homebrew/bin brew --prefix)
 
 COMPILER_VERSION		:= $(shell $(CXX) --version | grep version | grep -o -m 1 "[0-9]\+\.[0-9]\+\.*[0-9]*" | head -n 1)
 COMPILER_VERSION_NUMBER		:= $(shell echo $(COMPILER_VERSION) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$$/&00/')
@@ -37,10 +36,10 @@ lib_unit_tests: $(BIN_DIR)/lib_unit_tests
 
 #unit test library
 $(BIN_DIR)/lib_unit_tests: CPPFLAGS := -MMD -MP -fvisibility=hidden
-$(BIN_DIR)/lib_unit_tests: CXXFLAGS += -fblocks -I $(BREW_PREFIX)/include -O0 -g3 -fcoverage-mapping $(SANI_FLAGS)
+$(BIN_DIR)/lib_unit_tests: CXXFLAGS += -fblocks $(shell pkg-config --cflags getargv) -O0 -g3 -fcoverage-mapping $(SANI_FLAGS)
 $(BIN_DIR)/lib_unit_tests: EXE      := $(BIN_DIR)/lib_unit_tests
-$(BIN_DIR)/lib_unit_tests: LDLIBS   := -l criterion -l getargv $(SANI_FLAGS)
-$(BIN_DIR)/lib_unit_tests: LDFLAGS  := -L $(BREW_PREFIX)/lib
+$(BIN_DIR)/lib_unit_tests: LDLIBS   := -l criterion $(SANI_FLAGS)
+$(BIN_DIR)/lib_unit_tests: LDFLAGS  := $(shell pkg-config --libs getargv)
 
 # test building with library, phony targets can't use % pattern when declaring deps, thus the non-DRY rules
 libtest1: $(DYLIB) $(BIN_DIR)/libtest1
