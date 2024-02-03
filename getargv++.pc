@@ -5,7 +5,7 @@ libdir=${prefix}/lib
 Name: getargv++
 Description: Library for getting the arguments of other processes.
 URL: https://getargv.narzt.cam/
-Version: 0.3
+Version: 0.4
 Requires: getargv
 Cflags: -I${includedir}
 Libs: -L${libdir} -lgetargv++
