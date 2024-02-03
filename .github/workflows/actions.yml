@@ -27,7 +27,10 @@ jobs:
         path: getargv
         token: ${{ secrets.GH_PAT }}
     - name: Build libgetargv
-      run: make install_dylib
+      run: "make dylib"
+      working-directory: getargv
+    - name: Install libgetargv
+      run: "sudo make install_dylib"
       working-directory: getargv
     - uses: actions/checkout@v4
       with:
