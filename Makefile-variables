@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 ifndef MACOS_VER_NUM
-MACOS_VER_NUM := $(shell vtool -show-build $(shell pkg-config --libs-only-L getargv)/libgetargv.dylib | awk '/minos/{print $$2}')
+MACOS_VER_NUM := $(shell vtool -show-build $(shell pkg-config --variable=libdir getargv)/libgetargv.dylib | awk '/minos/{print $$2}')
 endif
 MACOS_VER_MAJOR			:= $(shell echo $(MACOS_VER_NUM) | cut -f1 -d.)
 MACOS_VER_MINOR			:= $(shell echo $(MACOS_VER_NUM) | cut -f2 -d.)
