@@ -76,6 +76,7 @@ jobs:
     - name: build unit tests
       run: make lib_unit_tests
       working-directory: getargv.cpp/test
+    - run: "echo | clang++ -c -v -x c++ -"
     - name: build libtests
       run: make libtest1 libtest2
       working-directory: getargv.cpp/test
