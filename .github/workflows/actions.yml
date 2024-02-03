@@ -162,4 +162,5 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: pkg/*.zip/*.dmg
+        tag_name: ${{ steps.version.ouputs.version }}
         name: ${{ steps.version.ouputs.version }}
