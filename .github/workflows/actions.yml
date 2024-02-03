@@ -123,7 +123,7 @@ jobs:
     - name: rename dmg
       run: mv pkg/*.dmg pkg/libgetargv++-${{ matrix.os }}.dmg
       working-directory: getargv.cpp
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}.zip
         path: |
@@ -146,7 +146,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: getargv.cpp
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         path: pkg
     - name: bump version
@@ -162,5 +162,5 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: pkg/*.zip/*.dmg
-        tag_name: ${{ steps.version.ouputs.version }}
         name: ${{ steps.version.ouputs.version }}
+        tag_name: ${{ steps.version.ouputs.version }}
