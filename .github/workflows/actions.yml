@@ -51,6 +51,14 @@ jobs:
           #- macos-11
     runs-on: ${{ matrix.os }}
     steps:
+    - name: install deps
+      run: |
+        brew update
+        brew install --force-bottle criterion
+      env:
+        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
+        HOMEBREW_NO_ENV_HINTS: yes
+        HOMEBREW_NO_ANALYTICS: yes
     - uses: actions/checkout@v4
       with:
         repository: getargv/getargv
@@ -65,30 +73,14 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: getargv.cpp
-    - name: install deps
-      run: |
-        brew update
-        brew install --force-bottle criterion
-      env:
-        HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
-        HOMEBREW_NO_ENV_HINTS: yes
-        HOMEBREW_NO_ANALYTICS: yes
     - name: build unit tests
       run: make lib_unit_tests
       working-directory: getargv.cpp/test
     - name: build libtests
-      run: |
-        make libtest1
-        make libtest2
+      run: make libtest1 libtest2
       working-directory: getargv.cpp/test
     - name: run tests with coverage
-      if: matrix.os != 'macos-10.15'
       run: make run_lib_unit_tests_coverage
-      timeout-minutes: 5
-      working-directory: getargv.cpp/test
-    - name: run tests without coverage
-      if: matrix.os == 'macos-10.15'
-      run: make run_lib_unit_tests
       timeout-minutes: 5
       working-directory: getargv.cpp/test
 
