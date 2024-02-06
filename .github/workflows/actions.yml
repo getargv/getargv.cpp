@@ -156,11 +156,7 @@ jobs:
 # do not merge these steps, version is scraped by makefile
 # at start of run, so needs to be bumped separately
     - name: tag & commit
-      run: |
-        git commit -am 'release ${{ steps.version.outputs.version }}'
-        git tag '${{ steps.version.outputs.version }}'
-        git push origin tag '${{ steps.version.outputs.version }}'
-        git push origin HEAD:main
+      run: make tag
       working-directory: getargv.cpp
     - name: Release
       uses: softprops/action-gh-release@v1
