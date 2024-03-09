@@ -14,7 +14,7 @@ This is a library providing a more idiomatic C++ API wrapping the C API provided
 
 ### Step 1: Downloading
 
-You can download a [source bundle](https://github.com/getargv/getargv.cpp/archive/refs/tags/0.1.tar.gz), or an [installer package](https://github.com/getargv/getargv.cpp/releases/download/0.1/libgetargv++-macos-13.dmg) from GitHub.
+You can download a [source bundle](https://github.com/getargv/getargv.cpp/archive/refs/tags/0.7.tar.gz), or an [installer package](https://github.com/getargv/getargv.cpp/releases/download/0.7/libgetargv++-macos-13.dmg) from GitHub.
 
 ### Step 2: Installing
 
@@ -29,7 +29,7 @@ echo | clang++ -c -v -x c++ - 2>&1 | sed -Ee '/search starts here/,/End of searc
 ```
 
 > [!IMPORTANT]
-> On Apple Silicon (ARM) Macs, Homebrew installs native packages in `/opt`, and puts Intel libraries in `/usr/local`, so your compiler will only automatically pick up Intel libraries, which is almost certainly not what you want. You need to explicitly exclude `/usr/local` from your search paths in this case and add `/opt/`.
+> On Apple Silicon (ARM) Macs, Homebrew installs native packages in `/opt`, and puts Intel libraries in `/usr/local`, so your compiler will only automatically pick up Intel libraries, which is almost certainly not what you want. You need to explicitly exclude `/usr/local` from your search paths in this case and add `/opt/`, the `CPATH` environment variable might be helpful to you in doing this.
 
 ### System Requirements
 
@@ -81,4 +81,4 @@ std::cout << byte;
 
 ## Safety
 
-This library attempts to provide guardrails where possible to avoid undefined behaviour, but C++ is not very well suited to the task, so care must still be taken.
+This library attempts to provide guardrails where possible to help avoid undefined behaviour, but C++ is not very well suited to this task, so care must still be taken.
