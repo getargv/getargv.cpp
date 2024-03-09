@@ -159,7 +159,7 @@ jobs:
       run: make tag
       working-directory: getargv.cpp
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: pkg/*.zip/*.dmg
         name: ${{ steps.version.outputs.version }}
