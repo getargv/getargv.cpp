@@ -16,8 +16,8 @@
 namespace Getargv {
   namespace ffi {
 #include <libgetargv.h>
-    using errno_t = ::errno_t;
-    using uint = ::uint;
+    using errno_t = errno_t;
+    using uint = uint;
   } // namespace ffi
 
   /** \brief This struct provides an iterable and printable representation of
