@@ -69,7 +69,7 @@ $(DMG): $(PRODUCT)
 
 $(DISTRIBUTION): $(SRC_DIR)/dist.xml
 	< $< > $@ sed \
-	-e 's/OS_VERSION/$(MACOS_VER_NUM)/g' \
+	-e 's/OS_VERSION/$(MACOSX_DEPLOYMENT_TARGET)/g' \
 	-e 's/ARCH/$(ARCH)/g' \
 	-e 's/VERSION/$(VERSION)/g' \
 	-e 's/LIB_PKG_NAME/$(LIB_PKG:$(PKG_DIR)/%=%)/g' \
