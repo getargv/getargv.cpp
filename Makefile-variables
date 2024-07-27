@@ -8,7 +8,7 @@ MACOS_LT_11			:= $(shell [ $(MACOS_VER_MAJOR) -eq 10 -a $(MACOS_VER_MINOR) -lt 1
 MACOS_LT_12			:= $(shell [ $(MACOS_VER_MAJOR) -eq 10 -a $(MACOS_VER_MINOR) -lt 16 ] || [ $(MACOS_VER_MAJOR) -lt 12 ] && echo true)
 export MACOSX_DEPLOYMENT_TARGET := $(MACOS_VER_MAJOR).$(MACOS_VER_MINOR)
 # When changing version, also change: getargv++.pc, doxygen.conf, and README.md
-VERSION=0.10
+VERSION=0.11
 #
 COMPAT_VERSION  := $(shell echo $(VERSION) | cut -f1 -d.).0
 ARCH		:= $(shell uname -m)
