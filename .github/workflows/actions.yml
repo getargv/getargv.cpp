@@ -142,6 +142,8 @@ jobs:
       GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
       MACOS_VER_NUM: 14
       CERT_IDENTITY: me
+      LDLIBS: -lgetargv
+      CXXFLAGS: -Iinclude
     steps:
     - uses: actions/checkout@v4
       with:
