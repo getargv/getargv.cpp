@@ -184,6 +184,9 @@ namespace Getargv {
      */
     auto operator[](ptrdiff_t index) const -> char&;
 
+    auto operator=(Argv&& other) -> Argv& = default;
+    auto operator=(Argv& other) -> Argv& = delete;
+
     /** \brief returns the number of bytes in the arguments this struct
      * represents.
      *
@@ -381,6 +384,9 @@ namespace Getargv {
      * \ref std::string here.
      */
     auto operator[](ptrdiff_t index) const -> char*&;
+
+    auto operator=(ArgvArgc&& other) -> ArgvArgc& = default;
+    auto operator=(ArgvArgc& other) -> ArgvArgc& = delete;
 
     /** \brief returns the number of arguments this struct represents
      *
