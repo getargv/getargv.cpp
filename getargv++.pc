@@ -6,7 +6,7 @@ dep=getargv
 Name: getargv++
 Description: Library for getting the arguments of other processes.
 URL: https://getargv.narzt.cam/
-Version: 0.11
+Version: 0.12
 Requires: ${dep}
 Cflags: -I${includedir}
 Libs: -L${libdir} -lgetargv++
