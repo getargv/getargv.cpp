@@ -45,10 +45,11 @@ jobs:
     strategy:
       matrix:
         os:
+          - macos-15
           - macos-14
           - macos-13
           - macos-12
-          #- macos-11
+          - macos-11
     runs-on: ${{ matrix.os }}
     steps:
     - name: install deps
