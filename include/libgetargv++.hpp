@@ -9,7 +9,6 @@
 
 #include "iter.hpp"
 #include <string>
-#include <system_error>
 #include <vector>
 
 /** \brief This namespace isolates the library from your code.

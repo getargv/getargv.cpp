@@ -1,5 +1,6 @@
 #include "../include/libgetargv++.hpp"
 #include <algorithm>
+#include <system_error>
 
 namespace Getargv {
 
