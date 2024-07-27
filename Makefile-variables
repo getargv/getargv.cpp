@@ -39,10 +39,11 @@ CXXFLAGS := --std=c++20 -O3 -Iinclude
 else
 CXXFLAGS := --std=c++17 -O3 -Iinclude
 endif
+CXXFLAGS += $(shell pkg-config --cflags getargv)
 
 EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
 LDFLAGS += -Llib -fvisibility=default -fPIC
-LDLIBS += -lgetargv
+LDLIBS += $(shell pkg-config --libs getargv)
 
 LIB_SHORT_NAME = getargv++
 LIB_NAME = lib$(LIB_SHORT_NAME)
