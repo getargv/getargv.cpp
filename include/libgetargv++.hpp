@@ -134,7 +134,7 @@ namespace Getargv {
      * from C or C++ could change the layout of the struct, making the C function
      * that frees the buffer not work.
      */
-    Argv(Argv& other) = delete;
+    Argv(const Argv& other) = delete;
 
     /** \brief This is a constructor for the Argv struct representing the args of
      * pid, formatted as specified.
@@ -335,7 +335,7 @@ namespace Getargv {
      * allocated from C or C++ could change the layout of the struct, making the C
      * function that frees the buffers not work.
      */
-    ArgvArgc(ArgvArgc& other) = delete;
+    ArgvArgc(const ArgvArgc& other) = delete;
 
     /** \brief This is a constructor for the ArgvArgc struct representing the args
      * of pid.
