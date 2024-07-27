@@ -402,6 +402,11 @@ Test(argv_argc, fail_perm_procargs) {
   cr_assert_throw({ Getargv::ArgvArgc::as_array(0); }, std::system_error);
 }
 
+Test(argv_argc, not_copyable) {
+  cr_assert_not(std::is_copy_constructible_v<Getargv::ArgvArgc>);
+  cr_assert_not(std::is_copy_assignable_v<Getargv::ArgvArgc>);
+}
+
 Test(argv, simple) {
   const std::string             expected = "bin/child\0"s;
   cleanup(kill_pid) pid_t const pid      = spawn(expected.c_str(), expected.c_str());
@@ -497,6 +502,11 @@ Test(argv, permissions) {
 
 Test(argv, not_exists) {
   cr_assert_throw({ const Getargv::Argv proc_ptrs(-1, 5, true); }, std::system_error);
+}
+
+Test(argv, not_copyable) {
+  cr_assert_not(std::is_copy_constructible_v<Getargv::Argv>);
+  cr_assert_not(std::is_copy_assignable_v<Getargv::Argv>);
 }
 
 void free_strings(struct criterion_test_params* crp) {
