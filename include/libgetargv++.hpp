@@ -9,6 +9,12 @@
 #define NODISCARD
 #endif
 
+#if defined(__cpp_deleted_function) && (__cplusplus >= __cpp_deleted_function)
+#define DELETEREASON ("Since this class manages an externally malloc'd buffer, copy is not supported; use move instead.")
+#else
+#define DELETEREASON
+#endif
+
 #include "iter.hpp"
 #include <string>
 #include <vector>
@@ -136,7 +142,7 @@ namespace Getargv {
      * from C or C++ could change the layout of the struct, making the C function
      * that frees the buffer not work.
      */
-    Argv(const Argv& other) = delete;
+    Argv(const Argv& other) = delete DELETEREASON;
 
     /** \brief This is a constructor for the Argv struct representing the args of
      * pid, formatted as specified.
@@ -187,7 +193,7 @@ namespace Getargv {
     auto operator[](ptrdiff_t index) const -> char&;
 
     auto operator=(Argv&& other) -> Argv& = default;
-    auto operator=(Argv& other) -> Argv& = delete;
+    auto operator=(Argv& other) -> Argv& = delete DELETEREASON;
 
     /** \brief returns the number of bytes in the arguments this struct
      * represents.
@@ -337,7 +343,7 @@ namespace Getargv {
      * allocated from C or C++ could change the layout of the struct, making the C
      * function that frees the buffers not work.
      */
-    ArgvArgc(const ArgvArgc& other) = delete;
+    ArgvArgc(const ArgvArgc& other) = delete DELETEREASON;
 
     /** \brief This is a constructor for the ArgvArgc struct representing the args
      * of pid.
@@ -388,7 +394,7 @@ namespace Getargv {
     auto operator[](ptrdiff_t index) const -> char*&;
 
     auto operator=(ArgvArgc&& other) -> ArgvArgc& = default;
-    auto operator=(ArgvArgc& other) -> ArgvArgc& = delete;
+    auto operator=(ArgvArgc& other) -> ArgvArgc& = delete DELETEREASON;
 
     /** \brief returns the number of arguments this struct represents
      *
