@@ -1,7 +1,9 @@
 #ifndef LIBGETARGVPLUSPLUS_H
 #define LIBGETARGVPLUSPLUS_H
 
-#if defined(__cplusplus) && (__cplusplus >= 201700L)
+#ifdef __cplusplus
+
+#if defined(__has_cpp_attribute) && (__cplusplus >= __has_cpp_attribute(nodiscard))
 #define NODISCARD [[nodiscard]]
 #else
 #define NODISCARD
@@ -421,4 +423,5 @@ namespace Getargv {
 
 } // namespace Getargv
 
-#endif
+#endif // __cplusplus
+#endif // LIBGETARGVPLUSPLUS_H

@@ -1,8 +1,10 @@
 #ifndef LIBGETARGVPLUSPLUS_ITERATOR_H
 #define LIBGETARGVPLUSPLUS_ITERATOR_H
 
+#ifdef __cplusplus
+
 #include <iterator>
-#if defined(__cplusplus) && (__cplusplus >= 202002L)
+#if defined(__cpp_lib_three_way_comparison) && __cplusplus >= __cpp_lib_three_way_comparison
 #include <compare>
 #endif
 namespace Getargv {
@@ -20,7 +22,7 @@ namespace Getargv {
    */
   template <typename T>
 struct Iterator {
-#if defined(__cplusplus) && (__cplusplus >= 202002L)
+#if defined(__cpp_concepts) && __cplusplus >= __cpp_concepts
   /** \brief A marker for the capabilities of this Iterator.
    * This is the strongest type of iterator in C++ >= 20, and we can satisfy the
    * requirements, so users can use this Iterator with as many algorithms from
@@ -271,7 +273,7 @@ struct Iterator {
    */
   auto operator[](difference_type idx) const -> reference { return _ptr[idx]; }
 
-#if defined(__cplusplus) && (__cplusplus >= 202002L)
+#if defined(__cpp_impl_three_way_comparison) && __cplusplus >= __cpp_impl_three_way_comparison
   /** \brief The three-way comparison operator.
    *
    * \param other The iterator to compare this one to.
@@ -307,4 +309,5 @@ private:
   pointer _ptr;
 };
 } // namespace Getargv
+#endif
 #endif
