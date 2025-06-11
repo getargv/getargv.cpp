@@ -45,10 +45,10 @@ jobs:
     strategy:
       matrix:
         os:
-          #- macos-15 not out yet
+          #- macos-26 not out yet
+          - macos-15
           - macos-14
           - macos-13
-          - macos-12
     runs-on: ${{ matrix.os }}
     steps:
     - name: install deps
@@ -91,10 +91,9 @@ jobs:
     strategy:
       matrix:
         os:
+          - macos-15
           - macos-14
           - macos-13
-          - macos-12
-          #- macos-11
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
