@@ -19,10 +19,68 @@
 #include <string>
 #include <vector>
 
+#if \
+defined(__cpp_lib_string_view) && (__cplusplus >= __cpp_lib_string_view) && \
+defined(__cpp_lib_type_trait_variable_templates) && (__cplusplus >= __cpp_lib_type_trait_variable_templates)
+
+#include <string_view>
+#include <type_traits>
+
+#if defined(__cpp_concepts) && (__cplusplus >= __cpp_concepts)
+
+template<typename T>
+concept StringLikeForArgv = std::is_convertible_v<T, std::string_view> && std::is_constructible_v<T, char*, char*>;
+template<typename T>
+concept StringLikeForArgvArgc = std::is_convertible_v<T, std::string_view> && std::is_constructible_v<T, char*>;
+
+
+template<typename T>
+concept StringForArgv = std::is_convertible_v<T, std::string> && std::is_constructible_v<T, char*, char*>;
+template<typename T>
+concept StringForArgvArgc = std::is_convertible_v<T, std::string> && std::is_constructible_v<T, char*>;
+
+#define PARAMETER_KEY_ARGV_TO StringLikeForArgv
+#define PARAMETER_KEY_ARGVARGC_TO StringLikeForArgvArgc
+#define PARAMETER_KEY_ARGV_AS StringForArgv
+#define PARAMETER_KEY_ARGVARGC_AS StringForArgvArgc
+
+#define PARAMETER_VALUE_ARGV_TO T
+#define PARAMETER_VALUE_ARGVARGC_TO T
+#define PARAMETER_VALUE_ARGV_AS T
+#define PARAMETER_VALUE_ARGVARGC_AS T
+
+#else
+
+#define PARAMETER_KEY_ARGV_TO typename
+#define PARAMETER_KEY_ARGVARGC_TO typename
+#define PARAMETER_KEY_ARGV_AS typename
+#define PARAMETER_KEY_ARGVARGC_AS typename
+
+#define PARAMETER_VALUE_ARGV_TO std::enable_if_t<std::is_constructible_v<T, char*, char*> && std::is_convertible_v<T, std::string_view>, T>
+#define PARAMETER_VALUE_ARGVARGC_TO std::enable_if_t<std::is_constructible_v<T, char*> && std::is_convertible_v<T, std::string_view>, T>
+#define PARAMETER_VALUE_ARGV_AS std::enable_if_t<std::is_constructible_v<T, char*, char*> && std::is_convertible_v<T, std::string>, T>
+#define PARAMETER_VALUE_ARGVARGC_AS std::enable_if_t<std::is_constructible_v<T, char*> && std::is_convertible_v<T, std::string>, T>
+
+#endif
+
+#else
+
+#define PARAMETER_KEY_ARGV_TO typename
+#define PARAMETER_KEY_ARGVARGC_TO typename
+#define PARAMETER_KEY_ARGV_AS typename
+#define PARAMETER_KEY_ARGVARGC_AS typename
+
+#define PARAMETER_VALUE_ARGV_TO typename std::enable_if<std::is_constructible<T, char*, char*>::value && std::is_convertible<T, std::string>::value, T>::type
+#define PARAMETER_VALUE_ARGVARGC_TO typename std::enable_if<std::is_constructible<T, char*>::value && std::is_convertible<T, std::string>::value, T>::type
+#define PARAMETER_VALUE_ARGV_AS #PARAMETER_VALUE_ARGV_TO
+#define PARAMETER_VALUE_ARGVARGC_AS #PARAMETER_VALUE_ARGVARGC_TO
+
+#endif
+
 /** \brief This namespace isolates the library from your code.
  */
 namespace Getargv {
-  namespace ffi {
+    namespace ffi {
 #include <libgetargv.h>
     using errno_t = errno_t;
     using uint = uint;
@@ -107,23 +165,25 @@ namespace Getargv {
      *
      * \sa as_bytes()
      */
-    static auto as_string(pid_t pid, unsigned int skip = 0, bool nuls = false) noexcept(false) -> std::string;
+    template <PARAMETER_KEY_ARGV_AS T>
+    NODISCARD static auto as_string(pid_t pid, unsigned int skip = 0, bool nuls = false) noexcept(false) -> PARAMETER_VALUE_ARGV_AS;
 
-    /** \brief This function converts an Argv into a \ref std::string.
+    /** \brief This function converts an Argv into a \ref std::string or \ref std::string_view.
      *
-     * This function creates a \ref std::string representing the args of the Argv.
+     * This function creates a \ref std::string or \ref std::string_view representing the args of the Argv.
      *
      * \attention Note that the arguments of a process on macOS are not guaranteed
      * to be in any encoding, and therefore should be treated with caution.
      * Particularly, unless nuls is set to true, there can be internal ␀ bytes in
      * the returned string.
      *
-     * \return A std::string representing the arguments of the targetted pid,
+     * \return A std::string or std::string_view representing the arguments of the targetted pid,
      * formatted as requested.
      *
      * \sa as_string()
      */
-    auto to_string() noexcept(false) -> std::string;
+    template <PARAMETER_KEY_ARGV_TO T>
+    NODISCARD auto to_string() const noexcept(false) -> PARAMETER_VALUE_ARGV_TO;
 
     /**
      * Due to being backed by a buffer allocated by the C lib, this struct cannot
@@ -308,23 +368,25 @@ namespace Getargv {
      *
      * \sa as_array()
      */
-    static auto as_string_array(pid_t pid) noexcept(false) -> std::vector<std::string>;
+    template <PARAMETER_KEY_ARGVARGC_AS T>
+    NODISCARD static auto as_vector(pid_t pid) noexcept(false) -> std::vector<PARAMETER_VALUE_ARGVARGC_AS>;
 
     /** \brief This function converts an ArgvArgc into a \ref
-     * std::vector<std::string>.
+     * std::vector<std::string> or std::vector<std::string_view>.
      *
-     * This function creates a \ref std::vector containing \ref std::string
+     * This function creates a \ref std::vector containing \ref std::string or std::string_view
      * representations of the args represented by the ArgvArgc.
      *
      * \attention Note that the arguments of a process on macOS are not guaranteed
      * to be in any encoding, and therefore should be treated with caution.
      *
-     * \return A std::vector<std::string> representing the arguments of the
-     * ArgvArgc.
+     * \return A std::vector<std::string> or std::vector<std::string_view> representing
+     * the arguments of the ArgvArgc.
      *
      * \sa as_string_array()
      */
-    NODISCARD auto to_string_array() const noexcept(false) -> std::vector<std::string>;
+    template <PARAMETER_KEY_ARGVARGC_TO T>
+    NODISCARD auto to_vector() const noexcept(false) -> std::vector<PARAMETER_VALUE_ARGVARGC_TO>;
 
     /**
      * Due to being backed by buffers allocated by the C lib, this struct cannot
@@ -387,9 +449,9 @@ namespace Getargv {
      * \returns a C string at the specified offset from the arguments this struct
      * represents.
      *
-     * /remark C strings (char*) auto convert to \ref std::string on assignment
-     * and when passed to functions, so there's no need to return a
-     * \ref std::string here.
+     * /remark C strings (char*) auto convert to \ref std::string or \ref
+     * std::string_view on assignment and when passed to functions, so there's
+     * no need to return a \ref std::string or \ref std::string_view here.
      */
     auto operator[](ptrdiff_t index) const -> char*&;
 

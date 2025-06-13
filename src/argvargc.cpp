@@ -4,6 +4,7 @@
 
 namespace Getargv {
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): Move of trivially copy-able type is useless
   ArgvArgc::ArgvArgc(ffi::ArgvArgcResult&& ffiResult) : ffi::ArgvArgcResult(ffiResult) {
     ffiResult.buffer = nullptr;
     ffiResult.argv   = nullptr;
@@ -46,16 +47,18 @@ namespace Getargv {
     }
   }
 
-  auto ArgvArgc::to_string_array() const noexcept(false) -> std::vector<std::string> {
-    std::vector<std::string> aresult;
+  template <PARAMETER_KEY_ARGVARGC_TO T>
+  auto ArgvArgc::to_vector() const noexcept(false) -> std::vector<PARAMETER_VALUE_ARGVARGC_TO> {
+    std::vector<T> aresult;
     aresult.reserve(static_cast<size_t>(this->size()));
-    std::transform(this->begin(), this->end(), back_inserter(aresult), [](char* cStr) -> std::string { return { cStr }; });
+    std::transform(this->begin(), this->end(), back_inserter(aresult), [](char* cStr) -> T { return { cStr }; } );
     return aresult;
   }
 
-  auto ArgvArgc::as_string_array(pid_t pid) noexcept(false) -> std::vector<std::string> {
+  template <PARAMETER_KEY_ARGVARGC_AS T>
+  auto ArgvArgc::as_vector(pid_t pid) noexcept(false) -> std::vector<PARAMETER_VALUE_ARGVARGC_AS> {
     const ArgvArgc result = ArgvArgc::as_array(pid);
-    return result.to_string_array();
+    return result.to_vector<T>();
   }
 
 } // namespace Getargv

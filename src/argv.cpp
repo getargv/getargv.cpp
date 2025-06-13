@@ -3,6 +3,7 @@
 
 namespace Getargv {
 
+  // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved): Move of trivially copy-able type is useless
   Argv::Argv(ffi::ArgvResult&& ffiResult) : ffi::ArgvResult(ffiResult) {
     ffiResult.buffer      = nullptr;
     ffiResult.end_pointer = nullptr;
@@ -69,14 +70,16 @@ namespace Getargv {
     return Argv(pid, skip, nuls);
   }
 
-  auto Argv::to_string() noexcept(false) -> std::string {
+  template <PARAMETER_KEY_ARGV_TO T>
+  auto Argv::to_string() const noexcept(false) -> PARAMETER_VALUE_ARGV_TO {
     return { this->start_pointer, this->end_pointer };
   }
 
-  auto Argv::as_string(pid_t pid, unsigned int skip, bool nuls) noexcept(false) -> std::string {
-    Argv result(pid, skip, nuls);
+  template <PARAMETER_KEY_ARGV_AS T>
+  auto Argv::as_string(pid_t pid, unsigned int skip, bool nuls) noexcept(false) -> PARAMETER_VALUE_ARGV_AS {
+    const Argv result(pid, skip, nuls);
 
-    return result.to_string();
+    return result.to_string<T>();
   }
 
 } // namespace Getargv
