@@ -33,7 +33,7 @@ echo | clang++ -c -v -x c++ - 2>&1 | sed -Ee '/search starts here/,/End of searc
 
 ### System Requirements
 
-macOS is required as this is a macOS specific `sysctl`, even BSD does not implement it. Your system must support `sysctl` and `KERN_PROCARGS2`, which probably means macOS [10.3](https://github.com/apple-oss-distributions/xnu/blob/xnu-517/bsd/sys/sysctl.h#L332) or later, though I haven't tested versions older than 10.7. You'll also need a non-ancient Clang++ (C++11 is required, C++20 is the default standard on Clang++ versions > 13, otherwise C++17) you can override the C++ std by setting `CXXFLAGS="--std=c++11 -O3 -Iinclude"`.
+macOS is required as this is a macOS specific `sysctl`, even BSD does not implement it. Your system must support `sysctl` and `KERN_PROCARGS2`, which probably means macOS [10.3](https://github.com/apple-oss-distributions/xnu/blob/xnu-517/bsd/sys/sysctl.h#L332) or later, though I haven't tested versions older than 10.7. You'll also need a non-ancient Clang++ (C++11 is the minimum required standard, C++23 is the default standard on Clang++ versions > 13, otherwise C++17 is the default standard) you can override the C++ std by setting `CXXFLAGS="--std=c++11 -O3 -Iinclude"`. All feature testing uses [the C++20 method](https://en.cppreference.com/w/cpp/feature_test.html).
 
 ## Building libgetargv++
 
@@ -46,13 +46,13 @@ To make `libgetargv++`:
 
 To make `libgetargv` Clone [the repo](https://github.com/getargv/getargv) and run `make dylib`.
 
-I've built `libgetargv` on macOS 10.7-14, using only the CLT package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
+I've built `libgetargv` on macOS 10.7-15, using only the CLT package, not the full Xcode install. If you need to override variables, do so inside the `make` command, eg: `make EXTRA_CPPFLAGS=-DMACRO EXTRA_CFLAGS=-std=c17 dylib`. If you are trying to build on a version of macOS earlier than 10.7, let me know how it goes.
 
 ## Testing
 
 Run `make -C test`.
 
-I've tested libgetargv++ on macOS 10.7-14, and run CI against all available GitHub hosted macOS runners, with plans to standup a CI cluster of VMs once I acquire appropriate hardware.
+I've tested libgetargv++ on macOS 10.7-15, and run CI against all available GitHub hosted macOS runners, with plans to standup a CI cluster of VMs once I acquire appropriate hardware.
 
 ## Usage
 
