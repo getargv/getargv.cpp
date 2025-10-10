@@ -21,7 +21,7 @@ jobs:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         repository: getargv/getargv
         path: getargv
@@ -32,7 +32,7 @@ jobs:
     - name: Install libgetargv
       run: sudo make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         path: getargv.cpp
     - name: check
@@ -45,10 +45,9 @@ jobs:
     strategy:
       matrix:
         os:
-          #- macos-26 not out yet
+          - macos-26
           - macos-15
           - macos-14
-          - macos-13
     runs-on: ${{ matrix.os }}
     steps:
     - name: install deps
@@ -59,7 +58,7 @@ jobs:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         repository: getargv/getargv
         path: getargv
@@ -70,7 +69,7 @@ jobs:
     - name: Install libgetargv
       run: sudo make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         path: getargv.cpp
     - name: build unit tests
@@ -91,12 +90,12 @@ jobs:
     strategy:
       matrix:
         os:
+          - macos-26
           - macos-15
           - macos-14
-          - macos-13
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         repository: getargv/getargv
         path: getargv
@@ -107,7 +106,7 @@ jobs:
     - name: Install libgetargv
       run: sudo make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         path: getargv.cpp
     - name: bump version
@@ -144,10 +143,10 @@ jobs:
       LDLIBS: -lgetargv
       CXXFLAGS: -Iinclude
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         path: getargv.cpp
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         path: pkg
     - name: bump version
