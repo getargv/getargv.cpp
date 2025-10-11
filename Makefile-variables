@@ -40,7 +40,7 @@ CXXFLAGS ?= --std=c++17 -O3 -Iinclude $(shell pkg-config --cflags getargv)
 endif
 
 EXTRA_CXXFLAGS := -pedantic-errors -Weverything -Wno-c++98-compat -Wno-pre-c++20-compat-pedantic -Wno-poison-system-directories
-LDFLAGS        := -Llib -fvisibility=default -fPIC
+LDFLAGS        := -Llib -fvisibility=default -fPIC -headerpad_max_install_names
 LDLIBS         ?= $(shell pkg-config --libs getargv)
 
 LIB_SHORT_NAME := getargv++
