@@ -1,24 +1,18 @@
-CXX                     := clang++
+include ../Makefile-variables
+
 PRIMARY_SOURCEFILE      := $(wildcard ../src/*.cpp)
 EXECUTABLE_NAME         := lib_unit_tests
-OBJ_DIR			:= obj
-LIB_DIR			:= lib
 BIN_DIR			:= bin
-SRC_DIR			:= src
-LIB_SHORT_NAME          := getargv++
 INCLUDE_DIR		:= include/$(LIB_SHORT_NAME)
 COV_DIR			:= coverage
 PREFIX			:= $(PWD)
 
-COMPILER_VERSION		:= $(shell $(CXX) --version | grep version | grep -o -m 1 "[0-9]\+\.[0-9]\+\.*[0-9]*" | head -n 1)
-COMPILER_VERSION_NUMBER		:= $(shell echo $(COMPILER_VERSION) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$$/&00/')
-CLANG_13_OR_MORE		:= $(shell expr $(COMPILER_VERSION_NUMBER) \>= 130106)
-ifneq ($(CLANG_13_OR_MORE),0)
-CXXFLAGS                := --std=c++23
-# supported: c++11, c++14, c++17, c++20, c++23
-# future: c++2c
+ifeq ($(CLANG_16_OR_MORE),true)
+CXXFLAGS := --std=c++23
+else ifeq ($(CLANG_13_OR_MORE),true)
+CXXFLAGS := --std=c++20
 else
-CXXFLAGS                := --std=c++17
+CXXFLAGS := --std=c++17
 endif
 
 LDFLAGS			:=
