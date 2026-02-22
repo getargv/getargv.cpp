@@ -31,14 +31,12 @@ lib_unit_tests: $(BIN_DIR)/lib_unit_tests
 #unit test library
 $(BIN_DIR)/lib_unit_tests: CPPFLAGS := -MMD -MP -fvisibility=hidden
 $(BIN_DIR)/lib_unit_tests: CXXFLAGS += -fblocks $(shell pkg-config --cflags getargv) $(shell pkg-config --cflags criterion | sed 's/-I/-isystem /g') -O0 -g3 -fcoverage-mapping $(SANI_FLAGS) -Wno-unused-value
-$(BIN_DIR)/lib_unit_tests: EXE      := $(BIN_DIR)/lib_unit_tests
 $(BIN_DIR)/lib_unit_tests: LDLIBS   :=  $(SANI_FLAGS)
 $(BIN_DIR)/lib_unit_tests: LDFLAGS  := $(shell pkg-config --libs getargv criterion)
 
 # test building with library, phony targets can't use % pattern when declaring deps, thus the non-DRY rules
 libtest1: $(DYLIB) $(BIN_DIR)/libtest1
 libtest2: $(DYLIB) $(BIN_DIR)/libtest2
-$(BIN_DIR)/libtest%: EXE := $(BIN_DIR)/libtest%
 $(BIN_DIR)/libtest%: CPPFLAGS :=
 $(BIN_DIR)/libtest%: CXXFLAGS += -I $(PREFIX)/$(INCLUDE_DIR)
 $(BIN_DIR)/libtest%: LDLIBS := -L $(PREFIX)/lib -l $(LIB_SHORT_NAME)
