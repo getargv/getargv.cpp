@@ -21,7 +21,7 @@ jobs:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         repository: getargv/getargv
         path: getargv
@@ -32,7 +32,7 @@ jobs:
     - name: Install libgetargv
       run: sudo make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         path: getargv.cpp
     - name: check
@@ -58,7 +58,7 @@ jobs:
         HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: yes
         HOMEBREW_NO_ENV_HINTS: yes
         HOMEBREW_NO_ANALYTICS: yes
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         repository: getargv/getargv
         path: getargv
@@ -69,7 +69,7 @@ jobs:
     - name: Install libgetargv
       run: sudo make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         path: getargv.cpp
     - name: build unit tests
@@ -95,7 +95,7 @@ jobs:
           - macos-14
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         repository: getargv/getargv
         path: getargv
@@ -106,7 +106,7 @@ jobs:
     - name: Install libgetargv
       run: sudo make install_dylib
       working-directory: getargv
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         path: getargv.cpp
     - name: bump version
@@ -121,7 +121,7 @@ jobs:
     - name: rename dmg
       run: mv pkg/*.dmg pkg/libgetargv++-${{ matrix.os }}.dmg
       working-directory: getargv.cpp
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: ${{ matrix.os }}.zip
         path: |
@@ -143,10 +143,10 @@ jobs:
       LDLIBS: -lgetargv
       CXXFLAGS: -Iinclude
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         path: getargv.cpp
-    - uses: actions/download-artifact@v5
+    - uses: actions/download-artifact@v6
       with:
         path: pkg
     - name: bump version
